@@ -1,0 +1,9 @@
+main: io.github.apickledwalrus.skriptworldguard.SkriptWorldGuard
+api-version: 1.13
+name: skript-worldguard
+authors:
+  - APickledWalrus
+description: Official WorldGuard 7 Addon for Skript
+version: 1.0-alpha1
+website: https://github.com/APickledWalrus/skript-worldguard
+softdepend: [Skript, WorldGuard]
