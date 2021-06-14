@@ -26,7 +26,7 @@ public class CondIsInRegion extends Condition {
 
 	static {
 		PropertyCondition.register(CondIsInRegion.class,
-				"in [[the] [worldguard] region[s]] %regions%", "entities"
+				"in [[the] [worldguard] region[s]] %worldguardregions%", "entities"
 		);
 	}
 
