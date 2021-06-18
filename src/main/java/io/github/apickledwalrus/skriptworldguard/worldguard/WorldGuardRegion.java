@@ -1,14 +1,14 @@
-package io.github.apickledwalrus.skriptworldguard;
+package io.github.apickledwalrus.skriptworldguard.worldguard;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.World;
 
-public class SkriptRegion {
+public class WorldGuardRegion {
 
 	private final World world;
 	private final ProtectedRegion region;
 
-	public SkriptRegion(World world, ProtectedRegion region) {
+	public WorldGuardRegion(World world, ProtectedRegion region) {
 		this.world = world;
 		this.region = region;
 	}
@@ -19,6 +19,15 @@ public class SkriptRegion {
 
 	public ProtectedRegion getRegion() {
 		return region;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof WorldGuardRegion) {
+			WorldGuardRegion other = (WorldGuardRegion) o;
+			return other.getRegion().getId().equals(region.getId()) && other.getWorld() == world;
+		}
+		return false;
 	}
 
 	@Override

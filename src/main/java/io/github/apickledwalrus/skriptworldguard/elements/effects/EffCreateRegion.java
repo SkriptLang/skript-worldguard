@@ -4,6 +4,7 @@ import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
@@ -16,7 +17,7 @@ import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import io.github.apickledwalrus.skriptworldguard.RegionUtils;
+import io.github.apickledwalrus.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.Event;
@@ -35,15 +36,16 @@ import java.util.List;
 		"A polygonal region is a region that has been extended vertically, meaning that a minimum Y and a maximum Y are needed to create it.",
 		"At least three points must be provided to create a polygonal region.",
 		"NOTE: If you do not specify the world for a region, you must be sure that the locations provided all have the SAME world.",
-		"NOTE: Region IDs are only valid if they contain A-Z, a-z, 0-9, underscores, commas, single quotation marks, dashes, pluses, or forward slashes."
+		"NOTE: Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, or forward slashes.",
+		"NOTE: If you attempt to create a region in a world where a region with the same id already exists, that region will be replaced."
 })
 @Examples({
-		"create a temporary global region named \"temporary_global_region\"",
-		"create region \"cuboid_region\" in player's world between location(0, 60, 0) and location(10, 70, 10)",
-		"create a new polygonal region with id \"polygonal_region\" with a minimum height of 10 and a maximum height of 20 with points {_locations::*}"
+		"create a temporary global region named \"temporary_global_region\" in the player's world",
+		"create region \"cuboid_region\" in player's world between the location (0, 60, 0) and the location (10, 70, 10)",
+		"create a new polygonal region with id \"polygonal_region\" with a minimum height of 10 and a maximum height of 20 with points {points::*}"
 })
+@RequiredPlugins("WorldGuard 7")
 @Since("1.0")
-// TODO check what happens if you try to create a region that already exists
 public class EffCreateRegion extends Effect {
 
 	static {
@@ -160,14 +162,16 @@ public class EffCreateRegion extends Effect {
 	@Override
 	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
-		if (firstCorner == null) { // Global region
-			return "create a new global region named " + id.toString(e, debug)
-					+ " in the world " + world.toString(e, debug);
-		} else { // Cuboid region
+		if (firstCorner != null) { // Cuboid region
+			return "";
+		} else if (minY != null) { // Polygonal region
 			assert secondCorner != null;
 			return "create a new cuboid region named " + id.toString(e, debug)
 					+ (world == null ? " " : " in the world " + world.toString(e, debug))
 					+ "between " + firstCorner.toString(e, debug) + " and " + secondCorner.toString(e, debug);
+		} else { // Global region
+			return "create a new global region named " + id.toString(e, debug)
+					+ " in the world " + world.toString(e, debug);
 		}
 	}
 

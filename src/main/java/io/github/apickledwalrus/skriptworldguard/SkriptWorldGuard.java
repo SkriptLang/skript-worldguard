@@ -4,6 +4,7 @@ import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
 import ch.njol.skript.util.Version;
 import com.sk89q.worldguard.WorldGuard;
+import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardEventHandler;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,6 +42,9 @@ public class SkriptWorldGuard extends JavaPlugin {
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
+
+		// Initialize Event Handler (shouldn't ever return false since 'after' is null)
+		WorldGuard.getInstance().getPlatform().getSessionManager().registerHandler(new WorldGuardEventHandler.Factory(), null);
 
 		// Start Initialization
 

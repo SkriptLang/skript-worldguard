@@ -10,55 +10,64 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
+import ch.njol.skript.util.Direction;
 import ch.njol.util.Kleenean;
 import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardRegion;
 import io.github.apickledwalrus.skriptworldguard.worldguard.RegionUtils;
-import org.bukkit.World;
+import org.bukkit.Location;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@Name("Regions")
-@Description("An expression that returns a region from a region id and world. Please note that region ids are case insensitive.")
-@Examples("the region \"region\" in world(\"world\"")
+import java.util.ArrayList;
+import java.util.List;
+
+@Name("Regions At")
+@Description("An expression that returns the regions at the given locations")
+@Examples({
+		"on click on a sign:",
+		"\tline 1 of the clicked block is \"[region info]\"",
+		"\tset {_regions::*} to regions at the clicked block",
+		"\tif {_regions::*} is empty:",
+		"\t\tmessage \"No regions exist at this sign.\"",
+		"\telse:",
+		"\t\tmessage \"Regions at this sign: <gold>%{_regions::*}%<reset>.\""
+})
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
-public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
+public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 
 	static {
-		Skript.registerExpression(ExprRegionNamed.class, WorldGuardRegion.class, ExpressionType.COMBINED,
-				"[the] [worldguard] region[s] [(with (name[s]|id[s])|named)] %strings% (in|of) [[the] world] %world%"
+		Skript.registerExpression(ExprRegionsAt.class, WorldGuardRegion.class, ExpressionType.PROPERTY,
+				"[the] regions %direction% %locations%"
 		);
 	}
 
-	private Expression<String> ids;
-	private Expression<World> world;
+	private Expression<Location> locations;
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		ids = (Expression<String>) exprs[0];
-		world = (Expression<World>) exprs[1];
+		locations = Direction.combine((Expression<? extends Direction>) exprs[0], (Expression<? extends Location>) exprs[1]);
 		return true;
 	}
 
 	@Override
 	protected WorldGuardRegion[] get(Event e) {
-		String[] ids = this.ids.getArray(e);
-		World world = this.world.getSingle(e);
-		if (ids.length == 0 || world == null) {
+		Location[] locations = this.locations.getArray(e);
+		if (locations.length == 0) {
 			return new WorldGuardRegion[0];
 		}
-		WorldGuardRegion[] regions = new WorldGuardRegion[ids.length];
-		for (int i = 0; i < ids.length; i++) {
-			regions[i] = RegionUtils.getRegion(world, ids[i]);
+		List<WorldGuardRegion> regions = new ArrayList<>();
+		for (Location location : locations) {
+			regions.addAll(RegionUtils.getRegionsAt(location));
 		}
-		return regions;
+		return regions.toArray(new WorldGuardRegion[0]);
 	}
 
 	@Override
 	public boolean isSingle() {
-		return ids.isSingle();
+		return false;
 	}
 
 	@Override
@@ -70,10 +79,7 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 	@Override
 	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
-		boolean isSingle = ids.isSingle();
-		return "the " + (isSingle ? "region" : "regions")
-				+ " with the " + (isSingle ? "id" : "ids") + " " + ids.toString(e, debug)
-				+ " in the world " + world.toString(e, debug);
+		return "the regions at " + locations.toString(e, debug);
 	}
 
 }
