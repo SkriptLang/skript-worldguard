@@ -61,7 +61,6 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 	@Override
 	public boolean check(Event e) {
 		RegionEnterLeaveEvent event = (RegionEnterLeaveEvent) e;
-
 		if (event.isEntering() != enter) { // This is a region enter event but we want a region leave event
 			return false;
 		} else if (regions == null) { // There are no regions to check so it is valid
@@ -73,7 +72,7 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 	@Override
 	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
-		return (enter ? "entering" : "leaving") + (regions == null ? "" : " of " + regions.toString(e, debug));
+		return (enter ? "entering" : "leaving") + " of " + (regions == null ? "a region" : regions.toString(e, debug));
 	}
 
 }

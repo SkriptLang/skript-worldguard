@@ -52,7 +52,7 @@ public class EffCreateRegion extends Effect {
 		Skript.registerEffect(EffCreateRegion.class,
 				"create [a] [new] [(1¦temporary)] global [worldguard] region [(with (name|id)|named)] %string% (in|of) [[the] world] %world%",
 				"create [a] [new] [(1¦temporary)] [(cuboid|rectangular)] [worldguard] region [(with (name|id)|named)] %string% [(in|of) [[the] world] %-world%] (between|from) %location% (to|and) %location%",
-				"create [a] [new] [(1¦temporary)] polygonal [worldguard] region [(with (name|id)|named)] %string% [(in|of) [[the] world] %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with points %locations%"
+				"create [a] [new] [(1¦temporary)] polygonal [worldguard] region [(with (name|id)|named)] %string% [(in|of) [[the] world] %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%"
 		);
 	}
 
@@ -163,14 +163,19 @@ public class EffCreateRegion extends Effect {
 	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		if (firstCorner != null) { // Cuboid region
-			return "";
-		} else if (minY != null) { // Polygonal region
 			assert secondCorner != null;
-			return "create a new cuboid region named " + id.toString(e, debug)
+			return "create a new " + (temporary ? "" : "temporary ") + "cuboid region named " + id.toString(e, debug)
 					+ (world == null ? " " : " in the world " + world.toString(e, debug))
 					+ "between " + firstCorner.toString(e, debug) + " and " + secondCorner.toString(e, debug);
+		} else if (minY != null) { // Polygonal region
+			assert maxY != null && points != null;
+			return "create a new " + (temporary ? "" : "temporary ") + "polygonal region named " + id.toString(e, debug)
+					+ (world == null ? " " : " in the world " + world.toString(e, debug))
+					+ " with a minimum height of " + minY.toString(e, debug)
+					+ " and a maximum height of " + maxY.toString(e, debug)
+					+ " with the points " + points.toString(e, debug);
 		} else { // Global region
-			return "create a new global region named " + id.toString(e, debug)
+			return "create a new " + (temporary ? "" : "temporary ") + "global region named " + id.toString(e, debug)
 					+ " in the world " + world.toString(e, debug);
 		}
 	}

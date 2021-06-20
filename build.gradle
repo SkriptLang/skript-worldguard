@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'io.github.apickledwalrus'
-version '1.0-alpha2'
+version '1.0-alpha1'
 
 compileJava.options.encoding = 'UTF-8'
 
@@ -16,8 +16,9 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'org.spigotmc', name: 'spigot-api', version: '1.16.5-R0.1-SNAPSHOT'
     implementation group: 'org.jetbrains', name: 'annotations', version: '16.0.2'
+
+    implementation group: 'org.spigotmc', name: 'spigot-api', version: '1.16.5-R0.1-SNAPSHOT'
     implementation (group: 'com.github.SkriptLang.Skript', name: 'Skript', version: '2.6-alpha1') {
         setTransitive(false)
     }

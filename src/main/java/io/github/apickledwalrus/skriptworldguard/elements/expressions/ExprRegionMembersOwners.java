@@ -217,8 +217,8 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		return "the " + (groups ? "group" : "player") + " "
-				+ (owners ? "owners" : "members" + " "
-				+ "of " + getExpr().toString(e, debug));
+				+ (owners ? "owners" : "members")
+				+ " of " + getExpr().toString(e, debug);
 	}
 
 }

@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 		"A condition that tests whether the given string(s) is/are a valid region id.",
 		"Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, or forward slashes."
 })
-@Examples("send \"True\" if \"global_region\" is a valid region id")
+@Examples("send \"I am a valid region ID!\" if \"global_region\" is a valid region id")
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class CondIsValidId extends PropertyCondition<String> {
