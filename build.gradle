@@ -29,6 +29,23 @@ dependencies {
 
 processResources {
     filter ReplaceTokens, tokens: [
-            'version': version
+        'version': version
     ]
+}
+
+task nightlyResources(type: ProcessResources) {
+    from 'src/main/resources', {
+        include '**'
+        version = project.property('version') + '-nightly-' + 'git rev-parse --short HEAD'.execute().text.trim()
+        filter ReplaceTokens, tokens: [
+            'version' : version,
+        ]
+    }
+    into 'build/resources/main'
+}
+
+task nightlyBuild(type: Jar) {
+    dependsOn nightlyResources
+    from sourceSets.main.output
+    archiveFileName = 'skript-worldguard-nightly.jar'
 }
