@@ -145,13 +145,13 @@ public class RegionClasses {
 					@Override
 					@NotNull
 					public String toVariableNameString(MoveType moveType) {
-						return "clicktype:" + moveType.name();
+						return "movetype:" + moveType.name();
 					}
 
 					@Override
 					@NotNull
 					public String getVariableNamePattern() {
-						return "clicktype:\\S+";
+						return "movetype:\\S+";
 					}
 				})
 				.serializer(new EnumSerializer<>(MoveType.class))

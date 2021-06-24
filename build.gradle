@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
     id 'java'
 }
@@ -23,4 +25,10 @@ dependencies {
         setTransitive(false)
     }
     implementation group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.0'
+}
+
+processResources {
+    filter ReplaceTokens, tokens: [
+            'version': version
+    ]
 }
