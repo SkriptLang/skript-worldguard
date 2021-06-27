@@ -36,9 +36,8 @@ processResources {
 task nightlyResources(type: ProcessResources) {
     from 'src/main/resources', {
         include '**'
-        version = project.property('version') + '-nightly-' + 'git rev-parse --short HEAD'.execute().text.trim()
         filter ReplaceTokens, tokens: [
-            'version' : version,
+            'version' : project.property('version') + '-nightly-' + 'git rev-parse --short HEAD'.execute().text.trim()
         ]
     }
     into 'build/resources/main'
