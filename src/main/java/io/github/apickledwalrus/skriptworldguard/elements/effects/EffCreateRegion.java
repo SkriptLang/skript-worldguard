@@ -21,28 +21,27 @@ import io.github.apickledwalrus.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Name("Create Region")
 @Description({
-		"An effect to create a WorldGuard region.",
-		"A temporary region is a region that will not be saved (only stored in memory).",
-		"A global region is a region that has no boundaries, meaning it covers the entire world.",
-		"A cuboid region is the traditional WorldGuard region most are used to creating. It has two points to determine the boundaries.",
-		"A polygonal region is a region that has been extended vertically, meaning that a minimum Y and a maximum Y are needed to create it.",
-		"At least three points must be provided to create a polygonal region.",
-		"NOTE: If you do not specify the world for a region, you must be sure that the locations provided all have the SAME world.",
-		"NOTE: Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, or forward slashes.",
-		"NOTE: If you attempt to create a region in a world where a region with the same id already exists, that region will be replaced."
+	"An effect to create a WorldGuard region.",
+	"A temporary region is a region that will not be saved (only stored in memory).",
+	"A global region is a region that has no boundaries, meaning it covers the entire world.",
+	"A cuboid region is the traditional WorldGuard region most are used to creating. It has two points to determine the boundaries.",
+	"A polygonal region is a region that has been extended vertically, meaning that a minimum Y and a maximum Y are needed to create it.",
+	"At least three points must be provided to create a polygonal region.",
+	"NOTE: If you do not specify the world for a region, you must be sure that the locations provided all have the SAME world.",
+	"NOTE: Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, or forward slashes.",
+	"NOTE: If you attempt to create a region in a world where a region with the same id already exists, that region will be replaced."
 })
 @Examples({
-		"create a temporary global region named \"temporary_global_region\" in the player's world",
-		"create region \"cuboid_region\" in player's world between the location (0, 60, 0) and the location (10, 70, 10)",
-		"create a new polygonal region with id \"polygonal_region\" with a minimum height of 10 and a maximum height of 20 with points {points::*}"
+	"create a temporary global region named \"temporary_global_region\" in the player's world",
+	"create region \"cuboid_region\" in player's world between the location (0, 60, 0) and the location (10, 70, 10)",
+	"create a new polygonal region with id \"polygonal_region\" with a minimum height of 10 and a maximum height of 20 with points {points::*}"
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -50,15 +49,17 @@ public class EffCreateRegion extends Effect {
 
 	static {
 		Skript.registerEffect(EffCreateRegion.class,
-				"create [a] [new] [(1¦temporary)] global [worldguard] region [(with (name|id)|named)] %string% (in|of) [[the] world] %world%",
-				"create [a] [new] [(1¦temporary)] [(cuboid|rectangular)] [worldguard] region [(with (name|id)|named)] %string% [(in|of) [[the] world] %-world%] (between|from) %location% (to|and) %location%",
-				"create [a] [new] [(1¦temporary)] polygonal [worldguard] region [(with (name|id)|named)] %string% [(in|of) [[the] world] %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%"
+				"create [a] [new] [:temporary] global [worldguard] region [(with [the] (name|id)|named)] %string% (in|of) [[the] world] %world%",
+				"create [a] [new] [:temporary] [(cuboid|rectangular)] [worldguard] region [(with [the] (name|id)|named)] %string% [(in|of) [[the] world] %-world%] (between|from) %location% (to|and) %location%",
+				"create [a] [new] [:temporary] polygonal [worldguard] region [(with [the] (name|id)|named)] %string% [(in|of) [[the] world] %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%"
 		);
 	}
 
 	// Shared Values
 	private boolean temporary;
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<String> id;
+	@Nullable
 	private Expression<World> world;
 	// Cuboid Region Values
 	@Nullable
@@ -160,22 +161,22 @@ public class EffCreateRegion extends Effect {
 	}
 
 	@Override
-	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		if (firstCorner != null) { // Cuboid region
 			assert secondCorner != null;
-			return "create a new " + (temporary ? "" : "temporary ") + "cuboid region named " + id.toString(e, debug)
+			return "create a new " + (temporary ? "temporary " : "") + "cuboid region named " + id.toString(e, debug)
 					+ (world == null ? " " : " in the world " + world.toString(e, debug))
 					+ "between " + firstCorner.toString(e, debug) + " and " + secondCorner.toString(e, debug);
 		} else if (minY != null) { // Polygonal region
 			assert maxY != null && points != null;
-			return "create a new " + (temporary ? "" : "temporary ") + "polygonal region named " + id.toString(e, debug)
+			return "create a new " + (temporary ? "temporary " : "") + "polygonal region named " + id.toString(e, debug)
 					+ (world == null ? " " : " in the world " + world.toString(e, debug))
 					+ " with a minimum height of " + minY.toString(e, debug)
 					+ " and a maximum height of " + maxY.toString(e, debug)
 					+ " with the points " + points.toString(e, debug);
 		} else { // Global region
-			return "create a new " + (temporary ? "" : "temporary ") + "global region named " + id.toString(e, debug)
+			assert world != null;
+			return "create a new " + (temporary ? "temporary " : "") + "global region named " + id.toString(e, debug)
 					+ " in the world " + world.toString(e, debug);
 		}
 	}

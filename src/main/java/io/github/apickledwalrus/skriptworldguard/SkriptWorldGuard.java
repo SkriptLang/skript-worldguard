@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class SkriptWorldGuard extends JavaPlugin {
 
-	public static final String prefix = "[skript-worldguard] ";
+	public static final String PREFIX = "[skript-worldguard] ";
 
 	private static SkriptWorldGuard instance;
 
@@ -23,22 +23,22 @@ public class SkriptWorldGuard extends JavaPlugin {
 
 		Plugin skript = getServer().getPluginManager().getPlugin("Skript");
 		if (skript == null || !skript.isEnabled()) {
-			getLogger().severe(prefix + "Could not find Skript! Make sure you have it installed and that it properly loaded. Disabling...");
+			getLogger().severe(PREFIX + "Could not find Skript! Make sure you have it installed and that it properly loaded. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		} else if (!Skript.getVersion().isLargerThan(new Version(2, 5, 3))) { // Skript is not any version after 2.5.3 (aka 2.6)
-			getLogger().severe(prefix + "You are running an unsupported version of Skript. Please update to at least Skript 2.6. Disabling...");
+			getLogger().severe(PREFIX + "You are running an unsupported version of Skript. Please update to at least Skript 2.6. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
 
 		Plugin worldGuard = getServer().getPluginManager().getPlugin("WorldGuard");
 		if (worldGuard == null || !worldGuard.isEnabled()) {
-			getLogger().severe(prefix + "Could not find WorldGuard! Make sure you have it installed and that it properly loaded. Disabling...");
+			getLogger().severe(PREFIX + "Could not find WorldGuard! Make sure you have it installed and that it properly loaded. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		} else if (new Version(WorldGuard.getVersion()).isSmallerThan(new Version(7))) {
-			getLogger().severe(prefix + "You are running an unsupported version of WorldGuard. Please update to at least WorldGuard 7. Disabling...");
+			getLogger().severe(PREFIX + "You are running an unsupported version of WorldGuard. Please update to at least WorldGuard 7. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}

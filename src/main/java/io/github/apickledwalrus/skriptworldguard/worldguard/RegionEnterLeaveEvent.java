@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
 
 public class RegionEnterLeaveEvent extends Event implements Cancellable {
 
@@ -54,7 +53,6 @@ public class RegionEnterLeaveEvent extends Event implements Cancellable {
 	}
 
 	@Override
-	@NotNull
 	public HandlerList getHandlers() {
 		return handlers;
 	}

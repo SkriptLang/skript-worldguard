@@ -15,16 +15,15 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Is Member/Owner of Region")
 @Description("A condition that tests whether the given players or groups are a member or owner of the given regions.")
 @Examples({
-		"on region enter:",
-		"\tplayer is the owner of the region",
-		"\tmessage \"Welcome back to %region%!\"",
-		"\tsend \"%player% just entered %region%!\" to the members of the region"
+	"on region enter:",
+	"\tplayer is the owner of the region",
+	"\tmessage \"Welcome back to %region%!\"",
+	"\tsend \"%player% just entered %region%!\" to the members of the region"
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -32,12 +31,14 @@ public class CondIsMemberOwner extends Condition {
 
 	static {
 		Skript.registerCondition(CondIsMemberOwner.class,
-				"%offlineplayers/strings% (is|are) (0¦[a] member|1¦[(the|an)] owner) of %worldguardregions%",
-				"%offlineplayers/strings% (is|are)(n't| not) (0¦[a] member|1¦[(the|an)] owner) of %worldguardregions%"
+				"%offlineplayers/strings% (is|are) ([a] member|owner:[(the|an)] owner) of %worldguardregions%",
+				"%offlineplayers/strings% (is|are)(n't| not) ([a] member|owner:[(the|an)] owner) of %worldguardregions%"
 		);
 	}
 
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<Object> users;
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<WorldGuardRegion> regions;
 	private boolean owner;
 
@@ -46,7 +47,7 @@ public class CondIsMemberOwner extends Condition {
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
 		users = (Expression<Object>) exprs[0];
 		regions = (Expression<WorldGuardRegion>) exprs[1];
-		owner = parseResult.mark == 1;
+		owner = parseResult.hasTag("owner");
 		setNegated(matchedPattern == 1);
 		return true;
 	}
@@ -68,7 +69,6 @@ public class CondIsMemberOwner extends Condition {
 	}
 
 	@Override
-	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		boolean isSingle = users.isSingle();
 		return users.toString(e, debug) + " " + (isSingle ? "is" : "are")

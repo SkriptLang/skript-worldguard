@@ -13,8 +13,7 @@ import io.github.apickledwalrus.skriptworldguard.worldguard.RegionUtils;
 import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 import java.io.StreamCorruptedException;
 import java.util.regex.Matcher;
@@ -57,26 +56,17 @@ public class RegionClasses {
 					}
 
 					@Override
-					@NotNull
 					public String toString(WorldGuardRegion region, int flags) {
 						return region.toString();
 					}
 
 					@Override
-					@NotNull
 					public String toVariableNameString(WorldGuardRegion region) {
 						return "worldguardregion:" + region;
-					}
-
-					@Override
-					@NotNull
-					public String getVariableNamePattern() {
-						return "worldguardregion:.+";
 					}
 				})
 				.serializer(new Serializer<WorldGuardRegion>() {
 					@Override
-					@NotNull
 					public Fields serialize(WorldGuardRegion region) {
 						Fields f = new Fields();
 						f.putObject("world", region.getWorld());
@@ -115,7 +105,7 @@ public class RegionClasses {
 				})
 		);
 
-		@SuppressWarnings("NullableProblems") EnumUtils<MoveType> moveTypes = new EnumUtils<>(MoveType.class, "worldguard move types");
+		EnumUtils<MoveType> moveTypes = new EnumUtils<>(MoveType.class, "worldguard move types");
 		Classes.registerClass(new ClassInfo<>(MoveType.class, "worldguardmovetype")
 				.user("worldguard move ?types?")
 				.name("WorldGuard Move Type")
@@ -127,6 +117,7 @@ public class RegionClasses {
 				.since("1.0")
 				.parser(new Parser<MoveType>() {
 					@Override
+					@Nullable
 					public MoveType parse(String s, ParseContext context) {
 						return moveTypes.parse(s);
 					}
@@ -137,21 +128,13 @@ public class RegionClasses {
 					}
 
 					@Override
-					@NotNull
 					public String toString(MoveType moveType, int flags) {
 						return moveTypes.toString(moveType, flags);
 					}
 
 					@Override
-					@NotNull
 					public String toVariableNameString(MoveType moveType) {
 						return "movetype:" + moveType.name();
-					}
-
-					@Override
-					@NotNull
-					public String getVariableNamePattern() {
-						return "movetype:\\S+";
 					}
 				})
 				.serializer(new EnumSerializer<>(MoveType.class))

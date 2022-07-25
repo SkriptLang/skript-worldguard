@@ -16,8 +16,7 @@ import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardRegion;
 import io.github.apickledwalrus.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +24,13 @@ import java.util.List;
 @Name("Regions At")
 @Description("An expression that returns the regions at the given locations")
 @Examples({
-		"on click on a sign:",
-		"\tline 1 of the clicked block is \"[region info]\"",
-		"\tset {_regions::*} to regions at the clicked block",
-		"\tif {_regions::*} is empty:",
-		"\t\tmessage \"No regions exist at this sign.\"",
-		"\telse:",
-		"\t\tmessage \"Regions at this sign: <gold>%{_regions::*}%<reset>.\""
+	"on click on a sign:",
+	"\tline 1 of the clicked block is \"[region info]\"",
+	"\tset {_regions::*} to regions at the clicked block",
+	"\tif {_regions::*} is empty:",
+	"\t\tmessage \"No regions exist at this sign.\"",
+	"\telse:",
+	"\t\tmessage \"Regions at this sign: <gold>%{_regions::*}%<reset>.\""
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -43,6 +42,7 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 		);
 	}
 
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<Location> locations;
 
 	@Override
@@ -71,13 +71,11 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	@NotNull
 	public Class<? extends WorldGuardRegion> getReturnType() {
 		return WorldGuardRegion.class;
 	}
 
 	@Override
-	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		return "the regions at " + locations.toString(e, debug);
 	}

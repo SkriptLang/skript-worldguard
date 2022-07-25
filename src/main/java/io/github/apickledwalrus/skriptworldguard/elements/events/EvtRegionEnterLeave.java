@@ -11,8 +11,7 @@ import io.github.apickledwalrus.skriptworldguard.worldguard.RegionEnterLeaveEven
 import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 public class EvtRegionEnterLeave extends SkriptEvent {
 
@@ -32,21 +31,22 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 			public WorldGuardRegion get(RegionEnterLeaveEvent e) {
 				return e.getRegion();
 			}
-		}, 0);
+		}, EventValues.TIME_NOW);
 		EventValues.registerEventValue(RegionEnterLeaveEvent.class, Player.class, new Getter<Player, RegionEnterLeaveEvent>() {
 			@Override
 			public Player get(RegionEnterLeaveEvent e) {
 				return e.getPlayer();
 			}
-		}, 0);
+		}, EventValues.TIME_NOW);
 		EventValues.registerEventValue(RegionEnterLeaveEvent.class, MoveType.class, new Getter<MoveType, RegionEnterLeaveEvent>() {
 			@Override
 			public MoveType get(RegionEnterLeaveEvent e) {
 				return e.getMoveType();
 			}
-		}, 0);
+		}, EventValues.TIME_NOW);
 	}
 
+	@Nullable
 	private Literal<WorldGuardRegion> regions;
 	private boolean enter;
 
@@ -61,7 +61,7 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 	@Override
 	public boolean check(Event e) {
 		RegionEnterLeaveEvent event = (RegionEnterLeaveEvent) e;
-		if (event.isEntering() != enter) { // This is a region enter event but we want a region leave event
+		if (event.isEntering() != enter) { // This is a region enter event, but we want a region leave event
 			return false;
 		} else if (regions == null) { // There are no regions to check so it is valid
 			return true;
@@ -70,7 +70,6 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 	}
 
 	@Override
-	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		return (enter ? "entering" : "leaving") + " of " + (regions == null ? "a region" : regions.toString(e, debug));
 	}

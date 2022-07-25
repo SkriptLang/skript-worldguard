@@ -14,16 +14,15 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Region Contains")
 @Description("A condition that tests whether the given locations are inside of the given regions")
 @Examples({
-		"player is in the region {spawnregion}",
-		"on region enter:",
-		"\tworldguard region the region contains {teamflags::red}",
-		"\tmessage \"The red flag is near!\""
+	"player is in the region {spawnregion}",
+	"on region enter:",
+	"\tworldguard region the region contains {teamflags::red}",
+	"\tmessage \"The red flag is near!\""
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -38,7 +37,9 @@ public class CondRegionContains extends Condition {
 		);
 	}
 
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<WorldGuardRegion> regions;
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<Location> locations;
 
 	@Override
@@ -60,7 +61,6 @@ public class CondRegionContains extends Condition {
 	}
 
 	@Override
-	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		return regions.toString(e, debug) + " contain" + (regions.isSingle() ? "s" : "") + " " + locations.toString(e, debug);
 	}

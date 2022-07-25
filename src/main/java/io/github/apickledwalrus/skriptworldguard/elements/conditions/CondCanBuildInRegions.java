@@ -17,19 +17,18 @@ import io.github.apickledwalrus.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Can Build In Regions")
 @Description("A condition that tests whether the given players can build in the given regions or the regions of the given locations.")
 @Examples({
-		"command /setblock <material>:",
-		"\tdescription: set the block at your crosshair to a different type",
-		"\ttrigger:",
-		"\t\tif the player cannot build at the targeted block:",
-		"\t\t\tmessage \"<red>You do not have permission to change blocks there!\"",
-		"\t\telse:",
-		"\t\t\tset the targeted block to argument"
+	"command /setblock <material>:",
+	"\tdescription: set the block at your crosshair to a different type",
+	"\ttrigger:",
+	"\t\tif the player cannot build at the targeted block:",
+	"\t\t\tmessage \"<red>You do not have permission to change blocks there!\"",
+	"\t\telse:",
+	"\t\t\tset the targeted block to argument"
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -42,8 +41,11 @@ public class CondCanBuildInRegions extends Condition {
 		);
 	}
 
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<Player> players;
+	@Nullable
 	private Expression<Location> locations;
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<WorldGuardRegion> regions;
 
 	@Override
@@ -77,7 +79,6 @@ public class CondCanBuildInRegions extends Condition {
 	}
 
 	@Override
-	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		return players.toString(e, debug) + " can build " + (locations != null ? locations.toString(e, debug) : regions.toString(e, debug));
 	}

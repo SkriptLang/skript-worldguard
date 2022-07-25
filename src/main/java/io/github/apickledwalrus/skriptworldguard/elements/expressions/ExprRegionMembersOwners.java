@@ -15,8 +15,7 @@ import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,20 +23,20 @@ import java.util.UUID;
 
 @Name("Members/Owners of Region")
 @Description({
-		"An expression that returns the members of owners of the given regions.",
-		"The members or owners of a region are not limited to players, so a keyword to get the group members or owners exists.",
-		"By default though, the player members or owners of a group will be returned."
+	"An expression that returns the members of owners of the given regions.",
+	"The members or owners of a region are not limited to players, so a keyword to get the group members or owners exists.",
+	"By default though, the player members or owners of a group will be returned."
 })
 @Examples({
-		"on region enter:",
-		"\tsend \"You're entering %region% whose owners are %owners of region%\"."
+	"on region enter:",
+	"\tsend \"You're entering %region% whose owners are %owners of region%\"."
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion, Object> {
 
 	static {
-		register(ExprRegionMembersOwners.class, Object.class, "[(player|1¦group)] (members|2¦owners)", "worldguardregions");
+		register(ExprRegionMembersOwners.class, Object.class, "[(player|:group)] (members|:owners)", "worldguardregions");
 	}
 
 	private boolean groups;
@@ -46,15 +45,14 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		int mark = parseResult.mark;
-		groups = mark == 1 || mark == 3;
-		owners = mark >= 2;
+		groups = parseResult.hasTag("group");
+		owners = parseResult.hasTag("owners");
 		setExpr((Expression<? extends WorldGuardRegion>) exprs[0]);
 		return true;
 	}
 
 	@Override
-	protected Object @NotNull [] get(Event e, WorldGuardRegion[] regions) {
+	protected Object[] get(Event e, WorldGuardRegion[] regions) {
 		if (groups) {
 			List<String> groups = new ArrayList<>();
 			if (owners) { // Group Owners
@@ -87,8 +85,6 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	@Nullable
-	@SuppressWarnings("NullableProblems") // Can return null
 	public Class<?>[] acceptChange(ChangeMode mode) {
 		switch (mode) {
 			case ADD:
@@ -104,7 +100,8 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	public void change(Event e, Object @Nullable [] delta, ChangeMode mode) {
+	public void change(Event e, Object[] delta, ChangeMode mode) {
+		//noinspection ConstantConditions
 		if ((delta == null && mode != ChangeMode.DELETE && mode != ChangeMode.RESET) || (delta != null && delta.length == 0)) {
 			return;
 		}
@@ -208,17 +205,15 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	@NotNull
 	public Class<?> getReturnType() {
 		return groups ? String.class : OfflinePlayer.class;
 	}
 
 	@Override
-	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		return "the " + (groups ? "group" : "player") + " "
-				+ (owners ? "owners" : "members")
-				+ " of " + getExpr().toString(e, debug);
+			+ (owners ? "owners" : "members")
+			+ " of " + getExpr().toString(e, debug);
 	}
 
 }

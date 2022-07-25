@@ -17,8 +17,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +33,7 @@ public class RegionUtils {
 	 * or the world's {@link RegionManager} could not be retrieved.
 	 */
 	@Nullable
-	public static WorldGuardRegion getRegion(@NotNull World world, @NotNull String id) {
+	public static WorldGuardRegion getRegion( World world, String id) {
 		if (!ProtectedRegion.isValidId(id)) {
 			return null;
 		}
@@ -52,7 +51,7 @@ public class RegionUtils {
 		return new WorldGuardRegion(world, region);
 	}
 
-	public static Collection<WorldGuardRegion> getRegionsAt(@NotNull Location location) {
+	public static Collection<WorldGuardRegion> getRegionsAt( Location location) {
 		List<WorldGuardRegion> regions = new ArrayList<>();
 
 		World world = location.getWorld();
@@ -72,7 +71,7 @@ public class RegionUtils {
 		return regions;
 	}
 
-	public static boolean canBuild(@NotNull Player player, @NotNull Location location) {
+	public static boolean canBuild( Player player, Location location) {
 		World world = location.getWorld();
 		if (world == null) {
 			return false;
@@ -82,7 +81,7 @@ public class RegionUtils {
 		return getRegionContainer().createQuery().testBuild(BukkitAdapter.adapt(location), WorldGuardPlugin.inst().wrapPlayer(player));
 	}
 
-	public static List<Block> getBlocksInRegion(@NotNull WorldGuardRegion region) {
+	public static List<Block> getBlocksInRegion( WorldGuardRegion region) {
 		ProtectedRegion protectedRegion = region.getRegion();
 		List<Block> blocks = new ArrayList<>();
 		if (protectedRegion instanceof ProtectedPolygonalRegion) { // Not as simple as a cube...
@@ -116,7 +115,7 @@ public class RegionUtils {
 	 * @return A stringified version of a region.
 	 * @see WorldGuardRegion#toString()
 	 */
-	public static String toString(@NotNull World world, @NotNull String id) {
+	public static String toString(World world, String id) {
 		return "region \"" + id + "\" in the world \"" + world.getName() + "\"";
 	}
 
@@ -137,7 +136,7 @@ public class RegionUtils {
 	 * - support for regions has been disabled
 	 */
 	@Nullable
-	public static RegionManager getRegionManager(@NotNull World world) {
+	public static RegionManager getRegionManager(World world) {
 		return WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world));
 	}
 

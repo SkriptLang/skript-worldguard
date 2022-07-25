@@ -15,8 +15,7 @@ import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardRegion;
 import io.github.apickledwalrus.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.World;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Regions")
 @Description("An expression that returns a region from a region id and world. Please note that region ids are case insensitive.")
@@ -27,11 +26,13 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 
 	static {
 		Skript.registerExpression(ExprRegionNamed.class, WorldGuardRegion.class, ExpressionType.COMBINED,
-				"[the] [worldguard] region[s] [(with (name[s]|id[s])|named)] %strings% (in|of) [[the] world] %world%"
+				"[the] [worldguard] region[s] [(with [the] (name[s]|id[s])|named)] %strings% (in|of) [[the] world] %world%"
 		);
 	}
 
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<String> ids;
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<World> world;
 
 	@Override
@@ -62,13 +63,11 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	@NotNull
 	public Class<? extends WorldGuardRegion> getReturnType() {
 		return WorldGuardRegion.class;
 	}
 
 	@Override
-	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		boolean isSingle = ids.isSingle();
 		return "the " + (isSingle ? "region" : "regions")

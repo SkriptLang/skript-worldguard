@@ -13,8 +13,7 @@ import io.github.apickledwalrus.skriptworldguard.worldguard.RegionUtils;
 import io.github.apickledwalrus.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,7 +38,7 @@ public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Blo
 	}
 
 	@Override
-	protected Block @NotNull [] get(Event event, WorldGuardRegion[] regions) {
+	protected Block[] get(Event event, WorldGuardRegion[] regions) {
 		return getBlocks(regions).toArray(new Block[0]);
 	}
 
@@ -60,13 +59,11 @@ public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Blo
 	}
 
 	@Override
-	@NotNull
 	public Class<? extends Block> getReturnType() {
 		return Block.class;
 	}
 
 	@Override
-	@NotNull
 	public String toString(@Nullable Event e, boolean debug) {
 		return "the blocks of " + getExpr().toString(e, debug);
 	}
