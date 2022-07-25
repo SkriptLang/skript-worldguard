@@ -49,9 +49,9 @@ public class EffCreateRegion extends Effect {
 
 	static {
 		Skript.registerEffect(EffCreateRegion.class,
-				"create [a] [new] [:temporary] global [worldguard] region [(with [the] (name|id)|named)] %string% (in|of) [[the] world] %world%",
-				"create [a] [new] [:temporary] [(cuboid|rectangular)] [worldguard] region [(with [the] (name|id)|named)] %string% [(in|of) [[the] world] %-world%] (between|from) %location% (to|and) %location%",
-				"create [a] [new] [:temporary] polygonal [worldguard] region [(with [the] (name|id)|named)] %string% [(in|of) [[the] world] %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%"
+				"create [a] [new] [:temporary] global [worldguard] region [named] %string% in [[the] world] %world%",
+				"create [a] [new] [:temporary] [cuboid|rectangular] [worldguard] region [named] %string% [in [[the] world] %-world%] (between|from) %location% (to|and) %location%",
+				"create [a] [new] [:temporary] polygonal [worldguard] region [named] %string% [in [[the] world] %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%"
 		);
 	}
 

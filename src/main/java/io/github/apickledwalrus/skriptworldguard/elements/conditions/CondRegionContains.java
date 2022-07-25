@@ -55,9 +55,10 @@ public class CondRegionContains extends Condition {
 	@Override
 	public boolean check(Event e) {
 		return regions.check(e,
-				region -> locations.check(e,
-					location -> region.getRegion().contains(BukkitAdapter.asBlockVector(location))
-				), isNegated());
+			region -> locations.check(e,
+				location -> region.getRegion().contains(BukkitAdapter.asBlockVector(location))
+			), isNegated()
+		);
 	}
 
 	@Override

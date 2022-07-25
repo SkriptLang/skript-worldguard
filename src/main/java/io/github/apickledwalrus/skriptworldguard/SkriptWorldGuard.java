@@ -14,6 +14,7 @@ public class SkriptWorldGuard extends JavaPlugin {
 
 	public static final String PREFIX = "[skript-worldguard] ";
 
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private static SkriptWorldGuard instance;
 
 	@Override
@@ -26,7 +27,7 @@ public class SkriptWorldGuard extends JavaPlugin {
 			getLogger().severe(PREFIX + "Could not find Skript! Make sure you have it installed and that it properly loaded. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
-		} else if (!Skript.getVersion().isLargerThan(new Version(2, 5, 3))) { // Skript is not any version after 2.5.3 (aka 2.6)
+		} else if (!Skript.getVersion().isLargerThan(new Version(2, 6, 3))) { // Skript is not any version after 2.5.3 (aka 2.6)
 			getLogger().severe(PREFIX + "You are running an unsupported version of Skript. Please update to at least Skript 2.6. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;

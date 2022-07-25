@@ -33,7 +33,7 @@ public class RegionUtils {
 	 * or the world's {@link RegionManager} could not be retrieved.
 	 */
 	@Nullable
-	public static WorldGuardRegion getRegion( World world, String id) {
+	public static WorldGuardRegion getRegion(World world, String id) {
 		if (!ProtectedRegion.isValidId(id)) {
 			return null;
 		}
@@ -51,7 +51,7 @@ public class RegionUtils {
 		return new WorldGuardRegion(world, region);
 	}
 
-	public static Collection<WorldGuardRegion> getRegionsAt( Location location) {
+	public static Collection<WorldGuardRegion> getRegionsAt(Location location) {
 		List<WorldGuardRegion> regions = new ArrayList<>();
 
 		World world = location.getWorld();
@@ -71,7 +71,7 @@ public class RegionUtils {
 		return regions;
 	}
 
-	public static boolean canBuild( Player player, Location location) {
+	public static boolean canBuild(Player player, Location location) {
 		World world = location.getWorld();
 		if (world == null) {
 			return false;
@@ -81,7 +81,7 @@ public class RegionUtils {
 		return getRegionContainer().createQuery().testBuild(BukkitAdapter.adapt(location), WorldGuardPlugin.inst().wrapPlayer(player));
 	}
 
-	public static List<Block> getBlocksInRegion( WorldGuardRegion region) {
+	public static List<Block> getBlocksInRegion(WorldGuardRegion region) {
 		ProtectedRegion protectedRegion = region.getRegion();
 		List<Block> blocks = new ArrayList<>();
 		if (protectedRegion instanceof ProtectedPolygonalRegion) { // Not as simple as a cube...
@@ -97,9 +97,9 @@ public class RegionUtils {
 			BlockVector3 min = protectedRegion.getMinimumPoint();
 			BlockVector3 max = protectedRegion.getMaximumPoint();
 			AABB aabb = new AABB(
-					region.getWorld(),
-					new Vector(min.getBlockX(), min.getBlockY(), min.getBlockZ()),
-					new Vector(max.getBlockX(), max.getBlockY(), max.getBlockZ())
+				region.getWorld(),
+				new Vector(min.getBlockX(), min.getBlockY(), min.getBlockZ()),
+				new Vector(max.getBlockX(), max.getBlockY(), max.getBlockZ())
 			);
 			for (Block block : aabb) {
 				blocks.add(block);
