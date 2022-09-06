@@ -4,7 +4,7 @@ plugins {
     id 'java'
 }
 
-group 'io.github.apickledwalrus'
+group 'org.skriptlang.skript'
 version '1.0-alpha1'
 
 compileJava.options.encoding = 'UTF-8'
