@@ -32,8 +32,9 @@ public class WorldGuardEventHandler extends Handler {
 	@Override
 	public boolean onCrossBoundary(LocalPlayer localPlayer, Location from, Location to, ApplicableRegionSet toSet, Set<ProtectedRegion> entered, Set<ProtectedRegion> exited, MoveType moveType) {
 		Player player = Bukkit.getPlayer(localPlayer.getUniqueId());
+		if (player == null) // this might be some sort of fake player (ex: Citizens), don't process anything
+			return true;
 		boolean cancellable = moveType.isCancellable();
-		assert player != null;
 
 		for (ProtectedRegion region : exited) { // Call leave events
 			RegionEnterLeaveEvent event = new RegionEnterLeaveEvent(player, new WorldGuardRegion(player.getWorld(), region), moveType, false);
