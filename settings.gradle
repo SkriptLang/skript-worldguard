@@ -1,1 +1,1 @@
-Set-ExecutionPolicy AllSigned rootProject.name = 'skript-worldguard'
+rootProject.name = 'skript-worldguard'
