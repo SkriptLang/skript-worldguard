@@ -20,38 +20,29 @@ import org.bukkit.World;
 import org.bukkit.event.Event;
 import org.skriptlang.skriptworldguard.SkriptWorldGuard;
 
-public class ExprRegionPriority extends SimpleExpression<Number> {
+public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegion, Number> {
 
     static {
 
-        Skript.registerExpression(ExprRegionPriority.class, Number.class, ExpressionType.COMBINED, "[the] priority of region %string% in [world] %world%");
+        Skript.registerExpression(ExprRegionPriority.class, Number.class, "priority", "worldguardregions");
 
     }
 
-    private Expression<String> region;
-    private Expression<World> world;
+
+    private Expression<WorldGuardRegion> region;
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean init(Expression<?>[] expression, int arg1, Kleenean arg2, SkriptParser.ParseResult arg3) {
-        region = (Expression<String>) expression[0];
-        world = (Expression<World>) expression[1];
+        region = (Expression<WorldGuardRegion>) expression[0]
         return true;
 
     }
 
     @Override
     protected Number[] get(Event event) {
-        Flag<?> fl = null;
 
-        WorldGuard wg = WorldGuard.getInstance();
-        RegionContainer container = wg.getPlatform().getRegionContainer();
-        RegionManager regions = container.get(BukkitAdapter.adapt(world.getSingle(event)));
-        ProtectedRegion rg = regions.getRegion(region.getSingle(event));
-
-
-
-        Number value = rg.getPriority();
+        Number value = region.getRegion().getPriority();
 
         return new Number[]{value};
     }
@@ -80,11 +71,7 @@ public class ExprRegionPriority extends SimpleExpression<Number> {
     public void change(Event e, Object[] delta, Changer.ChangeMode mode){
 
 
-        WorldGuard wg = WorldGuard.getInstance();
-        RegionContainer container = wg.getPlatform().getRegionContainer();
-        RegionManager regions = container.get(BukkitAdapter.adapt(world.getSingle(e)));
-
-        ProtectedRegion rg = regions.getRegion(region.getSingle(e));
+        rg = region.getRegion();
 
         if (rg != null){
             if (mode == Changer.ChangeMode.SET && delta != null){
@@ -94,7 +81,7 @@ public class ExprRegionPriority extends SimpleExpression<Number> {
                 SkriptWorldGuard.getInstance().getLogger().warning("A region priority can only be set.");
             }
         }else{
-            SkriptWorldGuard.getInstance().getLogger().warning("Could not find region " + "\"" + rg.getId()  +"\".");
+            SkriptWorldGuard.getInstance().getLogger().warning("Could not find region " + "\"" + region.toString() +"\".");
         }
     }
 
