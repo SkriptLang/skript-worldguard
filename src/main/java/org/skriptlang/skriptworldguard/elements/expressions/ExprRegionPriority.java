@@ -3,6 +3,7 @@ package org.skriptlang.skriptworldguard.elements.expressions;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.classes.Changer;
+import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
@@ -19,12 +20,13 @@ import com.sk89q.worldguard.protection.regions.RegionContainer;
 import org.bukkit.World;
 import org.bukkit.event.Event;
 import org.skriptlang.skriptworldguard.SkriptWorldGuard;
+import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
 public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegion, Number> {
 
     static {
 
-        Skript.registerExpression(ExprRegionPriority.class, Number.class, "priority", "worldguardregions");
+        register(ExprRegionPriority.class, Number.class, "priority", "worldguardregions");
 
     }
 
@@ -34,18 +36,24 @@ public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegio
     @SuppressWarnings("unchecked")
     @Override
     public boolean init(Expression<?>[] expression, int arg1, Kleenean arg2, SkriptParser.ParseResult arg3) {
-        region = (Expression<WorldGuardRegion>) expression[0]
+        region = (Expression<WorldGuardRegion>) expression[0];
         return true;
 
     }
 
     @Override
-    protected Number[] get(Event event) {
+    public Number convert(WorldGuardRegion rg) {
 
-        Number value = region.getRegion().getPriority();
+        Number value = rg.getRegion().getPriority();
 
-        return new Number[]{value};
+        return value;
     }
+
+    @Override
+    protected String getPropertyName() {
+        return "priority";
+    }
+
 
     @Override
     public String toString(Event arg0, boolean arg1) {
@@ -57,10 +65,7 @@ public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegio
         return Number.class;
     }
 
-    @Override
-    public boolean isSingle() {
-        return true;
-    }
+
 
     @Override
     public Class<?>[] acceptChange(final Changer.ChangeMode mode){
@@ -71,7 +76,7 @@ public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegio
     public void change(Event e, Object[] delta, Changer.ChangeMode mode){
 
 
-        rg = region.getRegion();
+        ProtectedRegion rg = region.getSingle(e).getRegion();
 
         if (rg != null){
             if (mode == Changer.ChangeMode.SET && delta != null){
