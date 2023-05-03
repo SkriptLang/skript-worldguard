@@ -1,65 +1,73 @@
 package org.skriptlang.skriptworldguard.elements.expressions;
 
 
-import ch.njol.skript.Skript;
+
 import ch.njol.skript.classes.Changer;
+import ch.njol.skript.expressions.base.PropertyExpression;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
-import ch.njol.skript.lang.SkriptParser;
-import ch.njol.skript.lang.util.SimpleExpression;
+import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
+
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.*;
-import com.sk89q.worldguard.protection.managers.RegionManager;
+
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
-import org.bukkit.World;
+
+
 import org.bukkit.event.Event;
 import org.skriptlang.skriptworldguard.SkriptWorldGuard;
+import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
-public class ExprRegionFlag extends SimpleExpression<String> {
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class ExprRegionFlag extends PropertyExpression<WorldGuardRegion, String> {
 
     static {
 
-        Skript.registerExpression(ExprRegionFlag.class, String.class, ExpressionType.COMBINED, "[the] flag %string% of region %string% in [world] %world%");
+        register(ExprRegionFlag.class, String.class, "[worldguard] flag %string%", "worldguardregions");
 
     }
 
     private Expression<String> flag;
-    private Expression<String> region;
-    private Expression<World> world;
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean init(Expression<?>[] expression, int arg1, Kleenean arg2, SkriptParser.ParseResult arg3) {
+    public boolean init(Expression<?>[] expression, int matchedPattern, Kleenean kleenean, ParseResult parseResult) {
         flag = (Expression<String>) expression[0];
-        region = (Expression<String>) expression[1];
-        world = (Expression<World>) expression[2];
+        setExpr((Expression<? extends WorldGuardRegion>) expression[1]);
         return true;
 
     }
 
     @Override
-    protected String[] get(Event event) {
+    protected String[] get(Event e, WorldGuardRegion[] region) {
         Flag<?> fl = null;
 
+
         WorldGuard wg = WorldGuard.getInstance();
-        RegionContainer container = wg.getPlatform().getRegionContainer();
-        RegionManager regions = container.get(BukkitAdapter.adapt(world.getSingle(event)));
-        ProtectedRegion rg = regions.getRegion(region.getSingle(event));
+        fl = Flags.fuzzyMatchFlag(wg.getFlagRegistry(), flag.getSingle(e));
 
-        fl = Flags.fuzzyMatchFlag(wg.getFlagRegistry(), flag.getSingle(event));
+        List<String> finalv = new ArrayList<>();
 
-        Object value = rg.getFlag(fl);
+        for (WorldGuardRegion wrg : region){
+            ProtectedRegion rg = wrg.getRegion();
+            if (rg != null){
+                finalv.add(rg.getFlag(fl).toString());
+            }
+        }
 
-        return new String[]{value.toString()};
+
+
+        return (String[]) finalv.toArray();
     }
 
     @Override
-    public String toString(Event arg0, boolean arg1) {
-        return "WorldGuard region flag";
+    public String toString(Event e, boolean debug) {
+
+        return "flag \"" + flag.getSingle(e) + "\" of region" ;
     }
 
     @Override
@@ -67,10 +75,7 @@ public class ExprRegionFlag extends SimpleExpression<String> {
         return String.class;
     }
 
-    @Override
-    public boolean isSingle() {
-        return true;
-    }
+
 
     @Override
     public Class<?>[] acceptChange(final Changer.ChangeMode mode){
@@ -83,47 +88,44 @@ public class ExprRegionFlag extends SimpleExpression<String> {
         Flag<?> fl = null;
 
         WorldGuard wg = WorldGuard.getInstance();
-        RegionContainer container = wg.getPlatform().getRegionContainer();
-        RegionManager regions = container.get(BukkitAdapter.adapt(world.getSingle(e)));
+        WorldGuardRegion[] regions = getExpr().getArray(e);
 
         fl = Flags.fuzzyMatchFlag(wg.getFlagRegistry(), flag.getSingle(e));
-        ProtectedRegion rg = regions.getRegion(region.getSingle(e));
-
-        if (rg != null && fl != null){
-            if (mode == Changer.ChangeMode.SET && delta != null){
-                if (delta[0] instanceof Boolean) {
-                    if ((Boolean) delta[0]) {
-                        rg.setFlag((StateFlag) fl, StateFlag.State.ALLOW);
+        for (WorldGuardRegion region : regions){
+            ProtectedRegion rg = region.getRegion();
+            if (rg != null && fl != null){
+                if (mode == Changer.ChangeMode.SET && delta != null){
+                    if (delta[0] instanceof Boolean) {
+                        if ((Boolean) delta[0]) {
+                            rg.setFlag((StateFlag) fl, StateFlag.State.ALLOW);
+                        } else {
+                            rg.setFlag((StateFlag) fl, StateFlag.State.DENY);
+                        }
+                    }
+                    else if (delta[0] instanceof String) {
+                        rg.setFlag((StringFlag) fl, (String) delta[0]);
+                    } else if (delta[0] instanceof Integer) {
+                        rg.setFlag((IntegerFlag) fl, (int) delta[0]);
+                    } else if (delta[0] instanceof Double) {
+                        rg.setFlag((DoubleFlag) fl, (double) delta[0]);
                     } else {
-                        rg.setFlag((StateFlag) fl, StateFlag.State.DENY);
+                        SkriptWorldGuard.getInstance().getLogger().warning("Region flag " + "\"" + fl.getName() + "\"" + " cannot be set to: " + delta[0]);
                     }
                 }
-                else if (delta[0] instanceof String) {
-                    rg.setFlag((StringFlag) fl, (String) delta[0]);
-                } else if (delta[0] instanceof Integer) {
-                    rg.setFlag((IntegerFlag) fl, (int) delta[0]);
-                } else if (delta[0] instanceof Double) {
-                    rg.setFlag((DoubleFlag) fl, (double) delta[0]);
-                } else {
-                    SkriptWorldGuard.getInstance().getLogger().warning("Region flag " + "\"" + fl.getName() + "\"" + " cannot be set to: " + delta[0]);
+                else if(mode == Changer.ChangeMode.DELETE){
+                    rg.setFlag(fl, null);
                 }
-            }
-            else if(mode == Changer.ChangeMode.DELETE){
-                rg.setFlag(fl, null);
-            }
-            else{
-                SkriptWorldGuard.getInstance().getLogger().warning("A flag can only be set or cleared.");
-            }
-        }else{
-            if (rg == null) {
-                SkriptWorldGuard.getInstance().getLogger().warning("Could not find region " + "\"" + rg.getId()  +"\".");
-            }
-            if (flag == null){
-                SkriptWorldGuard.getInstance().getLogger().warning("Could not find flag " + "\"" + flag.getSingle(e) +"\".");
+                else{
+                    SkriptWorldGuard.getInstance().getLogger().warning("A flag can only be set or cleared.");
+                }
+            }else{
+                if (rg == null) {
+                    SkriptWorldGuard.getInstance().getLogger().warning("Could not find region " + "\"" + rg.getId()  +"\".");
+                }
+                if (flag == null){
+                    SkriptWorldGuard.getInstance().getLogger().warning("Could not find flag " + "\"" + flag.getSingle(e) +"\".");
+                }
             }
         }
     }
-
-
-
 }
