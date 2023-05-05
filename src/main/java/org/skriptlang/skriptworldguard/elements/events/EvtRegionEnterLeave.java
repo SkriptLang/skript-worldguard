@@ -28,14 +28,14 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 				.since("1.0");
 		EventValues.registerEventValue(RegionEnterLeaveEvent.class, WorldGuardRegion.class, new Getter<WorldGuardRegion, RegionEnterLeaveEvent>() {
 			@Override
-			public WorldGuardRegion get(RegionEnterLeaveEvent e) {
-				return e.getRegion();
+			public WorldGuardRegion get(RegionEnterLeaveEvent event) {
+				return event.getRegion();
 			}
 		}, EventValues.TIME_NOW);
 		EventValues.registerEventValue(RegionEnterLeaveEvent.class, Player.class, new Getter<Player, RegionEnterLeaveEvent>() {
 			@Override
-			public Player get(RegionEnterLeaveEvent e) {
-				return e.getPlayer();
+			public Player get(RegionEnterLeaveEvent event) {
+				return event.getPlayer();
 			}
 		}, EventValues.TIME_NOW);
 		EventValues.registerEventValue(RegionEnterLeaveEvent.class, MoveType.class, new Getter<MoveType, RegionEnterLeaveEvent>() {
@@ -66,12 +66,13 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 		} else if (regions == null) { // There are no regions to check so it is valid
 			return true;
 		}
-		return regions.check(e, region -> region.equals(event.getRegion()));
+		return regions.check(event, region -> region.equals(event.getRegion()));
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
-		return (enter ? "entering" : "leaving") + " of " + (regions == null ? "a region" : regions.toString(e, debug));
+	public String toString(@Nullable Event event, boolean debug) {
+		return (enter ? "entering" : "leaving") + " of "
+				+ (regions == null ? "a region" : regions.toString(event, debug));
 	}
 
 }

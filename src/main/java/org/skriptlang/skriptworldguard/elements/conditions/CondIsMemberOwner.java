@@ -9,6 +9,7 @@ import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
+import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -31,8 +32,8 @@ public class CondIsMemberOwner extends Condition {
 
 	static {
 		Skript.registerCondition(CondIsMemberOwner.class,
-				"%offlineplayers/strings% (is|are) ([a] member|owner:[(the|an)] owner) of %worldguardregions%",
-				"%offlineplayers/strings% (is|are)(n't| not) ([a] member|owner:[(the|an)] owner) of %worldguardregions%"
+				"%offlineplayers/strings% (is|are) ([a] member|owner:[the|an] owner) of %worldguardregions%",
+				"%offlineplayers/strings% (is|are)(n't| not) ([a] member|owner:[the|an] owner) of %worldguardregions%"
 		);
 	}
 
@@ -53,28 +54,36 @@ public class CondIsMemberOwner extends Condition {
 	}
 
 	@Override
-	public boolean check(Event e) {
-		return users.check(e,
-				user -> {
-					if (user instanceof OfflinePlayer) {
-						LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapOfflinePlayer((OfflinePlayer) user);
-						return regions.check(e,
-								region -> owner ? region.getRegion().isOwner(localPlayer) : region.getRegion().isMember(localPlayer));
-					} else { // It's a String
-						String group = (String) user;
-						return regions.check(e,
-								region -> owner ? region.getRegion().getOwners().getGroups().contains(group) : region.getRegion().getMembers().getGroups().contains(group));
-					}
-				}, isNegated());
+	public boolean check(Event event) {
+		WorldGuardRegion[] regions = this.regions.getAll(event);
+		return users.check(event, user -> {
+			if (user instanceof OfflinePlayer) {
+				LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapOfflinePlayer((OfflinePlayer) user);
+				return SimpleExpression.check(
+						regions,
+						region -> owner ? region.getRegion().isOwner(localPlayer) : region.getRegion().isMember(localPlayer),
+						false,
+						this.regions.getAnd()
+				);
+			} else { // It's a String (group)
+				String group = (String) user;
+				return SimpleExpression.check(
+						regions,
+						region -> (owner ? region.getRegion().getOwners() : region.getRegion().getMembers()).getGroups().contains(group),
+						false,
+						this.regions.getAnd()
+				);
+			}
+		}, isNegated());
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
 		boolean isSingle = users.isSingle();
-		return users.toString(e, debug) + " " + (isSingle ? "is" : "are")
+		return users.toString(event, debug) + " " + (isSingle ? "is" : "are")
 				+ (isNegated() ? " not" : "")
-				+ (isSingle ? " an" : " the") + " " + (owner ? "owner" : "member") + (isSingle ? "" : "s")
-				+ " of " + regions.toString(e, debug);
+				+ " the " + (owner ? "owner" : "member") + (isSingle ? "" : "s")
+				+ " of " + regions.toString(event, debug);
 	}
 
 }

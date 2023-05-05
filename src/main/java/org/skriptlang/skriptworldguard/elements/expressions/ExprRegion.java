@@ -23,7 +23,9 @@ import org.eclipse.jdt.annotation.Nullable;
 public class ExprRegion extends EventValueExpression<WorldGuardRegion> {
 
 	static {
-		Skript.registerExpression(ExprRegion.class, WorldGuardRegion.class, ExpressionType.SIMPLE, "[the] [worldguard] region");
+		Skript.registerExpression(ExprRegion.class, WorldGuardRegion.class, ExpressionType.SIMPLE,
+				"[the] [worldguard] region"
+		);
 	}
 
 	public ExprRegion() {
@@ -31,7 +33,7 @@ public class ExprRegion extends EventValueExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
 		return "the worldguard region";
 	}
 

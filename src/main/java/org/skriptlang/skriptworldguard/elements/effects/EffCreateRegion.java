@@ -41,7 +41,7 @@ import java.util.List;
 @Examples({
 	"create a temporary global region named \"temporary_global_region\" in the player's world",
 	"create region \"cuboid_region\" in player's world between the location (0, 60, 0) and the location (10, 70, 10)",
-	"create a new polygonal region with id \"polygonal_region\" with a minimum height of 10 and a maximum height of 20 with points {points::*}"
+	"create a polygonal region named \"polygonal_region\" with a minimum height of 10 and a maximum height of 20 with points {points::*}"
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -49,9 +49,9 @@ public class EffCreateRegion extends Effect {
 
 	static {
 		Skript.registerEffect(EffCreateRegion.class,
-				"create [a] [new] [:temporary] global [worldguard] region [named] %string% in [[the] world] %world%",
-				"create [a] [new] [:temporary] [cuboid|rectangular] [worldguard] region [named] %string% [in [[the] world] %-world%] (between|from) %location% (to|and) %location%",
-				"create [a] [new] [:temporary] polygonal [worldguard] region [named] %string% [in [[the] world] %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%"
+				"create [a] [:temporary] global [worldguard] region [named] %string% in %world%",
+				"create [a] [:temporary] [cuboid|rectangular] [worldguard] region [named] %string% [in %-world%] (between|from) %location% (to|and) %location%",
+				"create [a] [:temporary] polygonal [worldguard] region [named] %string% [in %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%"
 		);
 	}
 
@@ -77,7 +77,7 @@ public class EffCreateRegion extends Effect {
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		temporary = parseResult.mark == 1;
+		temporary = parseResult.hasTag("temporary");
 		id = (Expression<String>) exprs[0];
 		world = (Expression<World>) exprs[1];
 		if (matchedPattern == 1) { // Cuboid Region
@@ -92,9 +92,9 @@ public class EffCreateRegion extends Effect {
 	}
 
 	@Override
-	protected void execute(Event e) {
-		String id = this.id.getSingle(e);
-		World world = this.world != null ? this.world.getSingle(e) : null; // May be null, but that is not necessarily a bad thing
+	protected void execute(Event event) {
+		String id = this.id.getSingle(event);
+		World world = this.world != null ? this.world.getSingle(event) : null; // May be null, but that is not necessarily a bad thing
 		if (id == null || !ProtectedRegion.isValidId(id)) {
 			return;
 		}
@@ -102,9 +102,9 @@ public class EffCreateRegion extends Effect {
 		ProtectedRegion region; // The new region we are going to create
 
 		if (firstCorner != null) { // Cuboid Region
-			Location firstCorner = this.firstCorner.getSingle(e);
+			Location firstCorner = this.firstCorner.getSingle(event);
 			assert secondCorner != null;
-			Location secondCorner = this.secondCorner.getSingle(e);
+			Location secondCorner = this.secondCorner.getSingle(event);
 			if (firstCorner == null || secondCorner == null) {
 				return;
 			}
@@ -127,7 +127,7 @@ public class EffCreateRegion extends Effect {
 			Number maxY;
 			Location[] points; // At least 3 points are needed
 			assert this.maxY != null && this.points != null;
-			if ((minY = this.minY.getSingle(e)) == null || (maxY = this.maxY.getSingle(e)) == null || (points = this.points.getArray(e)).length < 3) {
+			if ((minY = this.minY.getSingle(event)) == null || (maxY = this.maxY.getSingle(event)) == null || (points = this.points.getArray(event)).length < 3) {
 				return;
 			}
 
@@ -161,23 +161,23 @@ public class EffCreateRegion extends Effect {
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
 		if (firstCorner != null) { // Cuboid region
 			assert secondCorner != null;
-			return "create a new " + (temporary ? "temporary " : "") + "cuboid region named " + id.toString(e, debug)
-					+ (world == null ? " " : " in the world " + world.toString(e, debug))
-					+ "between " + firstCorner.toString(e, debug) + " and " + secondCorner.toString(e, debug);
+			return "create a new " + (temporary ? "temporary " : "") + "cuboid region named " + id.toString(event, debug)
+					+ (world == null ? " " : " in the world " + world.toString(event, debug))
+					+ "between " + firstCorner.toString(event, debug) + " and " + secondCorner.toString(event, debug);
 		} else if (minY != null) { // Polygonal region
 			assert maxY != null && points != null;
-			return "create a new " + (temporary ? "temporary " : "") + "polygonal region named " + id.toString(e, debug)
-					+ (world == null ? " " : " in the world " + world.toString(e, debug))
-					+ " with a minimum height of " + minY.toString(e, debug)
-					+ " and a maximum height of " + maxY.toString(e, debug)
-					+ " with the points " + points.toString(e, debug);
+			return "create a new " + (temporary ? "temporary " : "") + "polygonal region named " + id.toString(event, debug)
+					+ (world == null ? " " : " in the world " + world.toString(event, debug))
+					+ " with a minimum height of " + minY.toString(event, debug)
+					+ " and a maximum height of " + maxY.toString(event, debug)
+					+ " with the points " + points.toString(event, debug);
 		} else { // Global region
 			assert world != null;
-			return "create a new " + (temporary ? "temporary " : "") + "global region named " + id.toString(e, debug)
-					+ " in the world " + world.toString(e, debug);
+			return "create a new " + (temporary ? "temporary " : "") + "global region named " + id.toString(event, debug)
+					+ " in the world " + world.toString(event, debug);
 		}
 	}
 

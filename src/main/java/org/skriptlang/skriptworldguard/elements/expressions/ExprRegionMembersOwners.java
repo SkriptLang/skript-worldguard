@@ -36,7 +36,7 @@ import java.util.UUID;
 public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion, Object> {
 
 	static {
-		register(ExprRegionMembersOwners.class, Object.class, "[(player|:group)] (members|:owners)", "worldguardregions");
+		register(ExprRegionMembersOwners.class, Object.class, "[player|:group] (members|:owners)", "worldguardregions");
 	}
 
 	private boolean groups;
@@ -52,7 +52,7 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	protected Object[] get(Event e, WorldGuardRegion[] regions) {
+	protected Object[] get(Event event, WorldGuardRegion[] regions) {
 		if (groups) {
 			List<String> groups = new ArrayList<>();
 			if (owners) { // Group Owners
@@ -100,13 +100,13 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	public void change(Event e, Object[] delta, ChangeMode mode) {
+	public void change(Event event, Object[] delta, ChangeMode mode) {
 		//noinspection ConstantConditions
 		if ((delta == null && mode != ChangeMode.DELETE && mode != ChangeMode.RESET) || (delta != null && delta.length == 0)) {
 			return;
 		}
 
-		WorldGuardRegion[] regions = getExpr().getArray(e);
+		WorldGuardRegion[] regions = getExpr().getArray(event);
 		if (regions.length == 0) {
 			return;
 		}
@@ -210,10 +210,10 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
 		return "the " + (groups ? "group" : "player") + " "
-			+ (owners ? "owners" : "members")
-			+ " of " + getExpr().toString(e, debug);
+				+ (owners ? "owners" : "members")
+				+ " of " + getExpr().toString(event, debug);
 	}
 
 }
