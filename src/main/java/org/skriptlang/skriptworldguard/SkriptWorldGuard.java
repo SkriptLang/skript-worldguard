@@ -2,6 +2,10 @@ package org.skriptlang.skriptworldguard;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
+import ch.njol.skript.hooks.regions.GriefPreventionHook;
+import ch.njol.skript.hooks.regions.PreciousStonesHook;
+import ch.njol.skript.hooks.regions.ResidenceHook;
+import ch.njol.skript.hooks.regions.WorldGuardHook;
 import ch.njol.skript.util.Version;
 import com.sk89q.worldguard.WorldGuard;
 import org.bukkit.plugin.Plugin;
@@ -62,6 +66,12 @@ public class SkriptWorldGuard extends JavaPlugin {
 			e.printStackTrace();
 			getServer().getPluginManager().disablePlugin(this);
 		}
+
+		// Skript hooks are disabled in a delayed startup task so this should be okay to do now
+		// Disable all regions hooks so that Skript doesn't load any of its region syntax
+		Skript.disableHookRegistration(
+				GriefPreventionHook.class, PreciousStonesHook.class, ResidenceHook.class, WorldGuardHook.class
+		);
 
 	}
 
