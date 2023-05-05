@@ -30,7 +30,9 @@ dependencies {
     implementation (group: 'com.github.SkriptLang', name: 'Skript', version: '2.6.3') {
         transitive = false
     }
-    implementation group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.0'
+    implementation (group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.0') {
+        exclude module: 'bstats-bukkit'
+    }
 }
 
 processResources {
