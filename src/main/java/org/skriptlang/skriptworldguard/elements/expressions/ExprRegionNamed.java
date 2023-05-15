@@ -26,7 +26,7 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 
 	static {
 		Skript.registerExpression(ExprRegionNamed.class, WorldGuardRegion.class, ExpressionType.COMBINED,
-				"[the] [worldguard] region[s] [(with [the] (name[s]|id[s])|named)] %strings% (in|of) [[the] world] %world%"
+				"[the] [worldguard] region[s] [with [the] (name[s]|id[s])|named] %strings% (in|of) [[the] world] %world%"
 		);
 	}
 
@@ -44,9 +44,9 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	protected WorldGuardRegion[] get(Event e) {
-		String[] ids = this.ids.getArray(e);
-		World world = this.world.getSingle(e);
+	protected WorldGuardRegion[] get(Event event) {
+		String[] ids = this.ids.getArray(event);
+		World world = this.world.getSingle(event);
 		if (ids.length == 0 || world == null) {
 			return new WorldGuardRegion[0];
 		}
@@ -68,11 +68,11 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
 		boolean isSingle = ids.isSingle();
 		return "the " + (isSingle ? "region" : "regions")
-				+ " with the " + (isSingle ? "id" : "ids") + " " + ids.toString(e, debug)
-				+ " in the world " + world.toString(e, debug);
+				+ " with the " + (isSingle ? "id" : "ids") + " " + ids.toString(event, debug)
+				+ " in the world " + world.toString(event, debug);
 	}
 
 }

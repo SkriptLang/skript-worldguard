@@ -23,7 +23,9 @@ import org.eclipse.jdt.annotation.Nullable;
 public class ExprMoveType extends EventValueExpression<MoveType> {
 
 	static {
-		Skript.registerExpression(ExprMoveType.class, MoveType.class, ExpressionType.SIMPLE, "[the] [worldguard] move[ ]type");
+		Skript.registerExpression(ExprMoveType.class, MoveType.class, ExpressionType.SIMPLE,
+				"[the] [worldguard] move[ ]type"
+		);
 	}
 
 	public ExprMoveType() {
@@ -31,7 +33,7 @@ public class ExprMoveType extends EventValueExpression<MoveType> {
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
 		return "the worldguard move type";
 	}
 

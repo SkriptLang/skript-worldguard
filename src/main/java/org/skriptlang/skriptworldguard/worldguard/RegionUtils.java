@@ -97,9 +97,9 @@ public class RegionUtils {
 			BlockVector3 min = protectedRegion.getMinimumPoint();
 			BlockVector3 max = protectedRegion.getMaximumPoint();
 			AABB aabb = new AABB(
-				region.getWorld(),
-				new Vector(min.getBlockX(), min.getBlockY(), min.getBlockZ()),
-				new Vector(max.getBlockX(), max.getBlockY(), max.getBlockZ())
+					region.getWorld(),
+					new Vector(min.getBlockX(), min.getBlockY(), min.getBlockZ()),
+					new Vector(max.getBlockX(), max.getBlockY(), max.getBlockZ())
 			);
 			for (Block block : aabb) {
 				blocks.add(block);

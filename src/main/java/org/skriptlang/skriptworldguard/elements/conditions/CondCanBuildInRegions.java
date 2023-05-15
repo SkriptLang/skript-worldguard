@@ -9,6 +9,7 @@ import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
+import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.util.Direction;
 import ch.njol.util.Kleenean;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -45,7 +46,7 @@ public class CondCanBuildInRegions extends Condition {
 	private Expression<Player> players;
 	@Nullable
 	private Expression<Location> locations;
-	@SuppressWarnings("NotNullFieldNotInitialized")
+	@Nullable
 	private Expression<WorldGuardRegion> regions;
 
 	@Override
@@ -53,7 +54,10 @@ public class CondCanBuildInRegions extends Condition {
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
 		players = (Expression<Player>) exprs[0];
 		if (exprs[1] != null) { // We are using directions and locations
-			locations = Direction.combine((Expression<? extends Direction>) exprs[1], (Expression<? extends Location>) exprs[2]);
+			locations = Direction.combine(
+					(Expression<? extends Direction>) exprs[1],
+					(Expression<? extends Location>) exprs[2]
+			);
 		} else {
 			regions = (Expression<WorldGuardRegion>) exprs[3];
 		}
@@ -62,25 +66,35 @@ public class CondCanBuildInRegions extends Condition {
 	}
 
 	@Override
-	public boolean check(Event e) {
-		return players.check(e,
-				player -> {
-					if (locations != null) {
-						return locations.check(e,
-								location -> RegionUtils.canBuild(player, location));
-					} else {
-						return regions.check(e, region -> { // Convert region to location essentially
+	public boolean check(Event event) {
+		if (locations != null) {
+			Location[] locations = this.locations.getAll(event);
+			return players.check(event, player -> SimpleExpression.check(
+					locations,
+					location -> RegionUtils.canBuild(player, location),
+					false,
+					this.locations.getAnd()
+			), isNegated());
+		} else {
+			assert regions != null;
+			WorldGuardRegion[] regions = this.regions.getAll(event);
+			return players.check(event, player -> SimpleExpression.check(
+					regions,
+					region -> { // Convert region to location essentially
 							BlockVector3 minPoint = region.getRegion().getMinimumPoint();
 							Location location = new Location(region.getWorld(), minPoint.getX(), minPoint.getY(), minPoint.getZ());
 							return RegionUtils.canBuild(player, location);
-						});
-					}
-				}, isNegated());
+					},
+					false,
+					this.regions.getAnd()
+			), isNegated());
+		}
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
-		return players.toString(e, debug) + " can build " + (locations != null ? locations.toString(e, debug) : regions.toString(e, debug));
+	public String toString(@Nullable Event event, boolean debug) {
+		assert (locations != null && regions == null) || (locations == null && regions != null);
+		return players.toString(event, debug) + " can build " + ((locations != null ? locations : regions).toString(event, debug));
 	}
 
 }

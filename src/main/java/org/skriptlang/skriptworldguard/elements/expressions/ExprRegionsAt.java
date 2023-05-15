@@ -48,13 +48,16 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		locations = Direction.combine((Expression<? extends Direction>) exprs[0], (Expression<? extends Location>) exprs[1]);
+		locations = Direction.combine(
+				(Expression<? extends Direction>) exprs[0],
+				(Expression<? extends Location>) exprs[1]
+		);
 		return true;
 	}
 
 	@Override
-	protected WorldGuardRegion[] get(Event e) {
-		Location[] locations = this.locations.getArray(e);
+	protected WorldGuardRegion[] get(Event event) {
+		Location[] locations = this.locations.getArray(event);
 		if (locations.length == 0) {
 			return new WorldGuardRegion[0];
 		}
@@ -76,8 +79,8 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
-		return "the regions at " + locations.toString(e, debug);
+	public String toString(@Nullable Event event, boolean debug) {
+		return "the regions " + locations.toString(event, debug);
 	}
 
 }

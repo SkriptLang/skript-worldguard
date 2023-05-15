@@ -9,6 +9,7 @@ import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
+import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
@@ -53,17 +54,20 @@ public class CondRegionContains extends Condition {
 	}
 
 	@Override
-	public boolean check(Event e) {
-		return regions.check(e,
-			region -> locations.check(e,
-				location -> region.getRegion().contains(BukkitAdapter.asBlockVector(location))
-			), isNegated()
-		);
+	public boolean check(Event event) {
+		Location[] locations = this.locations.getAll(event);
+		return regions.check(event, region -> SimpleExpression.check(
+				locations,
+				location -> region.getRegion().contains(BukkitAdapter.asBlockVector(location)),
+				false,
+				this.locations.getAnd()
+		), isNegated());
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
-		return regions.toString(e, debug) + " contain" + (regions.isSingle() ? "s" : "") + " " + locations.toString(e, debug);
+	public String toString(@Nullable Event event, boolean debug) {
+		return regions.toString(event, debug) + " contain" + (regions.isSingle() ? "s" : "") +
+				" " + locations.toString(event, debug);
 	}
 
 }

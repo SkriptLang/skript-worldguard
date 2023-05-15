@@ -43,8 +43,8 @@ public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Blo
 	}
 
 	@Override
-	public Iterator<? extends Block> iterator(Event e) {
-		return getBlocks(getExpr().getArray(e)).iterator();
+	public Iterator<? extends Block> iterator(Event event) {
+		return getBlocks(getExpr().getArray(event)).iterator();
 	}
 
 	private List<Block> getBlocks(WorldGuardRegion[] regions) {
@@ -64,8 +64,8 @@ public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Blo
 	}
 
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
-		return "the blocks of " + getExpr().toString(e, debug);
+	public String toString(@Nullable Event event, boolean debug) {
+		return "the blocks of " + getExpr().toString(event, debug);
 	}
 
 }
