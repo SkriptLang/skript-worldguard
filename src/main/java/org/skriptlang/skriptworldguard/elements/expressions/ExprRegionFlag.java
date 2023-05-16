@@ -10,7 +10,12 @@ import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.flags.*;
+import com.sk89q.worldguard.protection.flags.DoubleFlag;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.IntegerFlag;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.flags.StringFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.event.Event;
 import org.skriptlang.skriptworldguard.SkriptWorldGuard;
@@ -20,11 +25,12 @@ import java.util.List;
 
 public class ExprRegionFlag extends PropertyExpression<WorldGuardRegion, Flag> {
 
+    private static final WorldGuard WORLD_GUARD = WorldGuard.getInstance();
+
     static {
         Skript.registerExpression(ExprRegionFlag.class, Flag.class, ExpressionType.COMBINED,"[worldguard] flag[s] %strings%", "worldguardregions");
     }
 
-    WorldGuard wg = WorldGuard.getInstance();
     private Expression<String> exprFlag;
     private Expression<WorldGuardRegion[]> exprRegions;
 
@@ -37,16 +43,18 @@ public class ExprRegionFlag extends PropertyExpression<WorldGuardRegion, Flag> {
     }
 
     @Override
-    protected Flag[] get(Event event, WorldGuardRegion[] region) {
-        Flag<?> flag = Flags.fuzzyMatchFlag(wg.getFlagRegistry(), exprFlag.getSingle(event));
-        List<Flag> result = new ArrayList<>();
-        for (WorldGuardRegion wrg : region){
-            ProtectedRegion rg = wrg.getRegion();
-            if (rg != null){
-                result.add((Flag) rg.getFlag(flag));
+    protected Flag[] get(Event event, WorldGuardRegion[] regions) {
+        String flag = exprFlag.getSingle(event);
+        if(flag != null) {
+            Flag<?> flagMatch = Flags.fuzzyMatchFlag(WORLD_GUARD.getFlagRegistry(), flag);
+            List<Flag> result = new ArrayList<>();
+            for (WorldGuardRegion region : regions) {
+                ProtectedRegion rg = region.getRegion();
+                result.add((Flag) rg.getFlag(flagMatch));
             }
+            return result.toArray(new Flag[0]);
         }
-        return (Flag[]) result.toArray();
+        return null;
     }
 
     @Override
@@ -54,55 +62,55 @@ public class ExprRegionFlag extends PropertyExpression<WorldGuardRegion, Flag> {
         switch (mode){
             case SET:
             case DELETE:
-                return CollectionUtils.array(String.class);
+            case RESET:
+                return CollectionUtils.array(String.class, Double.class, Boolean.class);
+            default:
+                return null;
         }
-        return null;
     }
 
     public void change(Event event, Object[] delta, Changer.ChangeMode mode){
-        Flag<?> flag;
-        if(exprFlag.getSingle(event) == null || exprRegions.getSingle(event) == null){
+        Flag<?> flagMatch;
+        String flag = exprFlag.getSingle(event);
+        WorldGuardRegion[] regions = exprRegions.getSingle(event);
+        if(flag == null || regions == null){
             return;
         }
         WorldGuard wg = WorldGuard.getInstance();
-        WorldGuardRegion[] regions = getExpr().getArray(event);
-        flag = Flags.fuzzyMatchFlag(wg.getFlagRegistry(), exprFlag.getSingle(event));
-        for (WorldGuardRegion region : regions){
-            ProtectedRegion rg = region.getRegion();
-            if (rg != null && flag != null){
-                switch(mode){
+        flagMatch = Flags.fuzzyMatchFlag(wg.getFlagRegistry(), flag);
+        if(flagMatch != null) {
+            for (WorldGuardRegion region : regions) {
+                ProtectedRegion rg = region.getRegion();
+                switch (mode) {
                     case SET:
-                        if(delta != null){
+                        if (delta != null) {
                             if (delta[0] instanceof Boolean) {
                                 if ((Boolean) delta[0]) {
-                                    rg.setFlag((StateFlag) flag, StateFlag.State.ALLOW);
+                                    rg.setFlag((StateFlag) flagMatch, StateFlag.State.ALLOW);
                                 } else {
-                                    rg.setFlag((StateFlag) flag, StateFlag.State.DENY);
+                                    rg.setFlag((StateFlag) flagMatch, StateFlag.State.DENY);
                                 }
-                            }
-                            else if (delta[0] instanceof String) {
-                                rg.setFlag((StringFlag) flag, (String) delta[0]);
+                            } else if (delta[0] instanceof String) {
+                                rg.setFlag((StringFlag) flagMatch, (String) delta[0]);
                             } else if (delta[0] instanceof Integer) {
-                                rg.setFlag((IntegerFlag) flag, (int) delta[0]);
+                                rg.setFlag((IntegerFlag) flagMatch, (int) delta[0]);
                             } else if (delta[0] instanceof Double) {
-                                rg.setFlag((DoubleFlag) flag, (double) delta[0]);
+                                rg.setFlag((DoubleFlag) flagMatch, (double) delta[0]);
                             } else {
-                                SkriptWorldGuard.getInstance().getLogger().warning("Region flag " + flag.getName() + " cannot be set to: " + delta[0]);
+                                SkriptWorldGuard.getInstance().getLogger().warning("Region flag " + flagMatch.getName() + " cannot be set to: " + delta[0]);
                             }
                         }
+                        break;
+                    case RESET:
                     case DELETE:
-                        rg.setFlag(flag, null);
+                        rg.setFlag(flagMatch, null);
+                        break;
                     default:
-                        Skript.error("A flag can only be set or cleared.");
-                }
-            }else{
-                if (rg == null) {
-                    SkriptWorldGuard.getInstance().getLogger().warning("Could not find region " + rg.getId());
-                }
-                if (flag == null){
-                    SkriptWorldGuard.getInstance().getLogger().warning("Could not find flag " +  flag.getName());
+                        assert false;
                 }
             }
+        }else{
+            SkriptWorldGuard.getInstance().getLogger().warning("Could not find flag " +  flagMatch.getName());
         }
     }
 
