@@ -7,16 +7,22 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.event.Event;
 import org.skriptlang.skriptworldguard.SkriptWorldGuard;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegion, Number> {
+public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegion[], Number[]> {
 
     static {
-        register(ExprRegionPriority.class, Number.class, "priority", "worldguardregions");
+        register(ExprRegionPriority.class, Number[].class, "priority", "worldguardregions");
     }
 
     @Override
-    public Number convert(WorldGuardRegion region) {
-        return region.getRegion().getPriority();
+    public Number[] convert(WorldGuardRegion[] regions) {
+        List<Number> priorities = new ArrayList<>();
+        for(WorldGuardRegion region : regions){
+            priorities.add(region.getRegion().getPriority());
+        }
+        return priorities.toArray(new Number[0]);
     }
 
     @Override
@@ -35,36 +41,37 @@ public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegio
     }
 
     public void change(Event event, Object[] delta, ChangeMode mode) {
-        WorldGuardRegion rg = getExpr().getSingle(event);
-        if (rg != null) {
-            ProtectedRegion region = rg.getRegion();
-            if (delta != null) {
-                switch (mode) {
-                    case SET:
-                        region.setPriority(((Number) delta[0]).intValue());
-                        break;
-                    case ADD:
-                        region.setPriority(region.getPriority() + ((Number) delta[0]).intValue());
-                        break;
-                    case REMOVE:
-                        region.setPriority(region.getPriority() - ((Number) delta[0]).intValue());
-                        break;
-                }
-            } else {
-                switch (mode) {
-                    case RESET:
-                    case DELETE:
-                        region.setPriority(0);
+        WorldGuardRegion[] regions = getExpr().getSingle(event);
+        assert regions != null;
+        for (WorldGuardRegion region : regions) {
+            if (region != null) {
+                ProtectedRegion protectedRegion = region.getRegion();
+                if (delta != null) {
+                    switch (mode) {
+                        case SET:
+                            protectedRegion.setPriority(((Number) delta[0]).intValue());
+                            break;
+                        case ADD:
+                            protectedRegion.setPriority(protectedRegion.getPriority() + ((Number) delta[0]).intValue());
+                            break;
+                        case REMOVE:
+                            protectedRegion.setPriority(protectedRegion.getPriority() - ((Number) delta[0]).intValue());
+                            break;
+                    }
+                } else {
+                    switch (mode) {
+                        case RESET:
+                        case DELETE:
+                            protectedRegion.setPriority(0);
+                    }
                 }
             }
-        } else {
-            SkriptWorldGuard.getInstance().getLogger().warning("Could not find region " + "\"" + rg.toString() + "\".");
         }
     }
 
     @Override
-    public Class<? extends Number> getReturnType() {
-        return Number.class;
+    public Class<? extends Number[]> getReturnType() {
+        return Number[].class;
     }
 
     @Override
