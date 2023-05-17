@@ -63,7 +63,7 @@ public class ExprRegionFlag extends PropertyExpression<WorldGuardRegion, Flag> {
             case SET:
             case DELETE:
             case RESET:
-                return CollectionUtils.array(String.class, Double.class, Boolean.class);
+                return CollectionUtils.array(String.class, Number.class, Boolean.class);
             default:
                 return null;
         }

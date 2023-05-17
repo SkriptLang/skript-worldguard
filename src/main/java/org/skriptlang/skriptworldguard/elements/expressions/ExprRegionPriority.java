@@ -5,24 +5,17 @@ import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import ch.njol.util.coll.CollectionUtils;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.event.Event;
-import org.skriptlang.skriptworldguard.SkriptWorldGuard;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
-import java.util.ArrayList;
-import java.util.List;
 
-public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegion[], Number[]> {
+public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegion, Number> {
 
     static {
-        register(ExprRegionPriority.class, Number[].class, "priority", "worldguardregions");
+        register(ExprRegionPriority.class, Number.class, "priority", "worldguardregions");
     }
 
     @Override
-    public Number[] convert(WorldGuardRegion[] regions) {
-        List<Number> priorities = new ArrayList<>();
-        for(WorldGuardRegion region : regions){
-            priorities.add(region.getRegion().getPriority());
-        }
-        return priorities.toArray(new Number[0]);
+    public Number convert(WorldGuardRegion region) {
+        return region.getRegion().getPriority();
     }
 
     @Override
@@ -41,7 +34,7 @@ public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegio
     }
 
     public void change(Event event, Object[] delta, ChangeMode mode) {
-        WorldGuardRegion[] regions = getExpr().getSingle(event);
+        WorldGuardRegion[] regions = getExpr().getArray(event);
         assert regions != null;
         for (WorldGuardRegion region : regions) {
             if (region != null) {
@@ -70,8 +63,8 @@ public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegio
     }
 
     @Override
-    public Class<? extends Number[]> getReturnType() {
-        return Number[].class;
+    public Class<? extends Number> getReturnType() {
+        return Number.class;
     }
 
     @Override
