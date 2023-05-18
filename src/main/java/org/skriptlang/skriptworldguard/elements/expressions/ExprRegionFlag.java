@@ -1,10 +1,8 @@
 package org.skriptlang.skriptworldguard.elements.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.classes.Changer;
 import ch.njol.skript.expressions.base.PropertyExpression;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.util.Kleenean;
@@ -23,36 +21,35 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExprRegionFlag extends PropertyExpression<WorldGuardRegion, Flag> {
+public class ExprRegionFlag extends PropertyExpression<WorldGuardRegion, Object> {
 
     private static final WorldGuard WORLD_GUARD = WorldGuard.getInstance();
 
     static {
-        Skript.registerExpression(ExprRegionFlag.class, Flag.class, ExpressionType.COMBINED,"[worldguard] flag[s] %strings%", "worldguardregions");
+        register(ExprRegionFlag.class, Object.class, "[worldguard] flag[s] %strings%", "worldguardregions");
     }
 
     private Expression<String> exprFlag;
-    private Expression<WorldGuardRegion[]> exprRegions;
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean init(Expression<?>[] expression, int matchedPattern, Kleenean kleenean, ParseResult parseResult) {
         exprFlag = (Expression<String>) expression[0];
-        exprRegions = (Expression<WorldGuardRegion[]>) expression[1];
+        setExpr((Expression<? extends WorldGuardRegion>) expression[1]);
         return true;
     }
 
     @Override
-    protected Flag[] get(Event event, WorldGuardRegion[] regions) {
+    protected Object[] get(Event event, WorldGuardRegion[] regions) {
         String flag = exprFlag.getSingle(event);
         if(flag != null) {
             Flag<?> flagMatch = Flags.fuzzyMatchFlag(WORLD_GUARD.getFlagRegistry(), flag);
-            List<Flag> result = new ArrayList<>();
+            List<Object> result = new ArrayList<>();
             for (WorldGuardRegion region : regions) {
                 ProtectedRegion rg = region.getRegion();
-                result.add((Flag) rg.getFlag(flagMatch));
+                result.add(rg.getFlag(flagMatch));
             }
-            return result.toArray(new Flag[0]);
+            return result.toArray(new Object[0]);
         }
         return null;
     }
@@ -72,7 +69,7 @@ public class ExprRegionFlag extends PropertyExpression<WorldGuardRegion, Flag> {
     public void change(Event event, Object[] delta, Changer.ChangeMode mode){
         Flag<?> flagMatch;
         String flag = exprFlag.getSingle(event);
-        WorldGuardRegion[] regions = exprRegions.getSingle(event);
+        WorldGuardRegion[] regions = getExpr().getArray(event);
         if(flag == null || regions == null){
             return;
         }
@@ -121,6 +118,6 @@ public class ExprRegionFlag extends PropertyExpression<WorldGuardRegion, Flag> {
 
     @Override
     public String toString(Event event, boolean debug) {
-        return "flag " + exprFlag.toString(event, debug) + " of region " + exprRegions.toString(event, debug) ;
+        return "flag " + exprFlag.toString(event, debug) + " of region " + getExpr().toString(event, debug) ;
     }
 }

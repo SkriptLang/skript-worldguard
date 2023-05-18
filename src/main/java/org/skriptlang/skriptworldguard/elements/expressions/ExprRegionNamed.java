@@ -1,6 +1,7 @@
 package org.skriptlang.skriptworldguard.elements.expressions;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -11,6 +12,8 @@ import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import ch.njol.util.coll.CollectionUtils;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.World;
@@ -55,6 +58,32 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 			regions[i] = RegionUtils.getRegion(world, ids[i]);
 		}
 		return regions;
+	}
+
+	@Override
+	public Class<?>[] acceptChange(ChangeMode mode) {
+		switch(mode){
+			case REMOVE:
+			case RESET:
+			case REMOVE_ALL:
+			case DELETE:
+				return CollectionUtils.array();
+			default:
+				return null;
+		}
+	}
+
+	@Override
+	public void change(Event event, Object[] delta, ChangeMode mode) {
+		String[] ids = this.ids.getArray(event);
+		World world = this.world.getSingle(event);
+		if (ids.length != 0 || world != null) {
+			for(String id : ids){
+				if(id != null){
+					RegionUtils.getRegionContainer().get(BukkitAdapter.adapt(world)).removeRegion(id);
+				}
+			}
+		}
 	}
 
 	@Override
