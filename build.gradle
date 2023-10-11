@@ -27,7 +27,7 @@ dependencies {
     implementation group: 'org.eclipse.jdt', name: 'org.eclipse.jdt.annotation', version: '2.2.600'
 
     implementation group: 'org.spigotmc', name: 'spigot-api', version: '1.13.2-R0.1-SNAPSHOT'
-    implementation (group: 'com.github.SkriptLang', name: 'Skript', version: '2.6.3') {
+    implementation (group: 'com.github.SkriptLang', name: 'Skript', version: '2.7.1') {
         transitive = false
     }
     implementation (group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.0') {
@@ -41,17 +41,17 @@ processResources {
     ]
 }
 
-task nightlyResources(type: ProcessResources) {
+tasks.register('nightlyResources', ProcessResources) {
     from 'src/main/resources', {
         include '**'
         filter ReplaceTokens, tokens: [
-            'version' : project.property('version') + '-nightly-' + 'git rev-parse --short HEAD'.execute().text.trim()
+                'version': project.property('version') + '-nightly-' + 'git rev-parse --short HEAD'.execute().text.trim()
         ]
     }
     into 'build/resources/main'
 }
 
-task nightlyBuild(type: Jar) {
+tasks.register('nightlyBuild', Jar) {
     dependsOn nightlyResources
     from sourceSets.main.output
     archiveFileName = 'skript-worldguard-nightly.jar'
