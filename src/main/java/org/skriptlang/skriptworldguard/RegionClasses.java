@@ -52,7 +52,7 @@ public class RegionClasses {
 
 					@Override
 					public boolean canParse(@NotNull ParseContext context) {
-						return true;
+						return context == ParseContext.EVENT || context == ParseContext.COMMAND;
 					}
 
 					@Override
