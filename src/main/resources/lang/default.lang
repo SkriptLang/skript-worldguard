@@ -10,4 +10,4 @@ worldguard move types:
     other_cancellable: cancellable
 types:
     worldguardregion: worldguard region¦s
-    worldguardmovetype : worldguard move type¦s
+    worldguardmovetype: worldguard move type¦s

@@ -57,9 +57,9 @@ public class SkriptWorldGuard extends JavaPlugin {
 
 		SkriptAddon addon = Skript.registerAddon(this);
 		try {
-			addon.loadClasses("org.skriptlang.skriptworldguard.elements");
 			addon.setLanguageFileDirectory("lang"); // Register ClassInfo lang definitions with Skript
 			new RegionClasses(); // Register ClassInfos with Skript
+			addon.loadClasses("org.skriptlang.skriptworldguard.elements");
 		} catch (IOException e) {
 			getLogger().severe("An error occurred while trying to register and load the addon with Skript. Disabling...");
 			getLogger().severe("Printing StackTrace:");
