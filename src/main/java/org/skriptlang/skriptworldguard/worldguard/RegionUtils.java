@@ -75,7 +75,9 @@ public class RegionUtils {
 		if (world == null) {
 			return false;
 		} else if (player.hasPermission("worldguard.region.bypass." + world.getName())) {
-			return true; // Build access is always granted with this permission
+			// Build access is always granted with this permission
+			// See https://worldguard.enginehub.org/en/latest/permissions/
+			return true;
 		}
 		return getRegionContainer().createQuery().testBuild(BukkitAdapter.adapt(location), WorldGuardPlugin.inst().wrapPlayer(player));
 	}
