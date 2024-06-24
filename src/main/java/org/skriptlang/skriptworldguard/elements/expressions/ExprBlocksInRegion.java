@@ -9,11 +9,12 @@ import ch.njol.skript.expressions.base.PropertyExpression;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
-import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,7 +22,7 @@ import java.util.List;
 
 @Name("Blocks of Region")
 @Description("An expression that returns all of the blocks in the given regions.")
-@Examples("set the blocks of {arenas::ffa} to air")
+@Examples("set the blocks of {arena} to air")
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Block> {
@@ -32,26 +33,23 @@ public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Blo
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
 		setExpr((Expression<WorldGuardRegion>) exprs[0]);
 		return true;
 	}
 
 	@Override
-	protected Block[] get(Event event, WorldGuardRegion[] regions) {
+	protected Block @NotNull [] get(@NotNull Event event, WorldGuardRegion @NotNull [] regions) {
 		return getBlocks(regions).toArray(new Block[0]);
 	}
 
 	@Override
-	public Iterator<? extends Block> iterator(Event event) {
+	public Iterator<? extends Block> iterator(@NotNull Event event) {
 		return getBlocks(getExpr().getArray(event)).iterator();
 	}
 
 	private List<Block> getBlocks(WorldGuardRegion[] regions) {
 		List<Block> blocks = new ArrayList<>();
-		if (regions.length == 0) {
-			return blocks;
-		}
 		for (WorldGuardRegion region : regions) {
 			blocks.addAll(RegionUtils.getBlocksInRegion(region));
 		}
@@ -59,12 +57,12 @@ public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Blo
 	}
 
 	@Override
-	public Class<? extends Block> getReturnType() {
+	public @NotNull Class<? extends Block> getReturnType() {
 		return Block.class;
 	}
 
 	@Override
-	public String toString(@Nullable Event event, boolean debug) {
+	public @NotNull String toString(@Nullable Event event, boolean debug) {
 		return "the blocks of " + getExpr().toString(event, debug);
 	}
 

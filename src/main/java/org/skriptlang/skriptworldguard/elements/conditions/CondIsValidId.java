@@ -7,6 +7,7 @@ import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import org.jetbrains.annotations.NotNull;
 
 @Name("Is Valid Region ID")
 @Description({
@@ -28,7 +29,7 @@ public class CondIsValidId extends PropertyCondition<String> {
 	}
 
 	@Override
-	protected String getPropertyName() {
+	protected @NotNull String getPropertyName() {
 		return "valid region id";
 	}
 

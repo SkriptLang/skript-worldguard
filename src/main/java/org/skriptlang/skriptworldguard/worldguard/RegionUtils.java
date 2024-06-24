@@ -17,7 +17,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-import org.eclipse.jdt.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,8 +32,7 @@ public class RegionUtils {
 	 * @return The region with the given id in the given world, or null if the region does not exist
 	 * or the world's {@link RegionManager} could not be retrieved.
 	 */
-	@Nullable
-	public static WorldGuardRegion getRegion(World world, String id) {
+	public static @Nullable WorldGuardRegion getRegion(World world, String id) {
 		if (!ProtectedRegion.isValidId(id)) {
 			return null;
 		}

@@ -16,7 +16,6 @@ import java.io.IOException;
 
 public class SkriptWorldGuard extends JavaPlugin {
 
-	@SuppressWarnings("NotNullFieldNotInitialized")
 	private static SkriptWorldGuard instance;
 
 	@Override

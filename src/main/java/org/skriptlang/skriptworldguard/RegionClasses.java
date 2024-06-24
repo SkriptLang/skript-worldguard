@@ -9,11 +9,12 @@ import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.EnumUtils;
 import ch.njol.yggdrasil.Fields;
 import com.sk89q.worldguard.session.MoveType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.eclipse.jdt.annotation.Nullable;
 
 import java.io.StreamCorruptedException;
 import java.util.regex.Matcher;
@@ -36,11 +37,10 @@ public class RegionClasses {
 							"(?:the )?(?:worldguard )?region (?:with (?:the )?(?:name|id) |named )?\"(.+)\" (?:in|of) (?:(?:the )?world )?\"(.+)\""
 					);
 
-					@Nullable
 					@Override
-					public WorldGuardRegion parse(String s, ParseContext context) {
+					public @Nullable WorldGuardRegion parse(@NotNull String input, @NotNull ParseContext context) {
 						if (context == ParseContext.EVENT || context == ParseContext.COMMAND) {
-							Matcher matcher = regionPattern.matcher(s);
+							Matcher matcher = regionPattern.matcher(input);
 							if (matcher.matches()) {
 								String id = matcher.group(1);
 								World world = Bukkit.getWorld(matcher.group(2));
@@ -51,23 +51,23 @@ public class RegionClasses {
 					}
 
 					@Override
-					public boolean canParse(ParseContext context) {
+					public boolean canParse(@NotNull ParseContext context) {
 						return true;
 					}
 
 					@Override
-					public String toString(WorldGuardRegion region, int flags) {
+					public @NotNull String toString(WorldGuardRegion region, int flags) {
 						return region.toString();
 					}
 
 					@Override
-					public String toVariableNameString(WorldGuardRegion region) {
+					public @NotNull String toVariableNameString(WorldGuardRegion region) {
 						return "worldguardregion:" + region;
 					}
 				})
 				.serializer(new Serializer<WorldGuardRegion>() {
 					@Override
-					public Fields serialize(WorldGuardRegion region) {
+					public @NotNull Fields serialize(WorldGuardRegion region) {
 						Fields f = new Fields();
 						f.putObject("world", region.getWorld());
 						f.putObject("id", region.getRegion().getId());
@@ -75,12 +75,12 @@ public class RegionClasses {
 					}
 
 					@Override
-					public void deserialize(WorldGuardRegion region, Fields fields) {
+					public void deserialize(WorldGuardRegion region, @NotNull Fields fields) {
 						assert false;
 					}
 
 					@Override
-					protected WorldGuardRegion deserialize(Fields fields) throws StreamCorruptedException {
+					protected WorldGuardRegion deserialize(@NotNull Fields fields) throws StreamCorruptedException {
 						World world = fields.getObject("world", World.class);
 						String id = fields.getObject("id", String.class);
 						if (world == null || id == null) {
@@ -118,22 +118,22 @@ public class RegionClasses {
 				.parser(new Parser<MoveType>() {
 					@Override
 					@Nullable
-					public MoveType parse(String s, ParseContext context) {
-						return moveTypes.parse(s);
+					public MoveType parse(@NotNull String input, @NotNull ParseContext context) {
+						return moveTypes.parse(input);
 					}
 
 					@Override
-					public boolean canParse(ParseContext context) {
+					public boolean canParse(@NotNull ParseContext context) {
 						return true;
 					}
 
 					@Override
-					public String toString(MoveType moveType, int flags) {
+					public @NotNull String toString(MoveType moveType, int flags) {
 						return moveTypes.toString(moveType, flags);
 					}
 
 					@Override
-					public String toVariableNameString(MoveType moveType) {
+					public @NotNull String toVariableNameString(MoveType moveType) {
 						return "movetype:" + moveType.name();
 					}
 				})

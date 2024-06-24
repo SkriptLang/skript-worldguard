@@ -11,11 +11,12 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
-import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.UUID;
 })
 @Examples({
 	"on region enter:",
-	"\tsend \"You're entering %region% whose owners are %owners of region%\"."
+		"\tsend \"You're entering %region% whose owners are %owners of region%\"."
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -44,7 +45,7 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
 		groups = parseResult.hasTag("group");
 		owners = parseResult.hasTag("owners");
 		setExpr((Expression<? extends WorldGuardRegion>) exprs[0]);
@@ -52,7 +53,7 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	protected Object[] get(Event event, WorldGuardRegion[] regions) {
+	protected Object @NotNull [] get(@NotNull Event event, WorldGuardRegion @NotNull [] regions) {
 		if (groups) {
 			List<String> groups = new ArrayList<>();
 			if (owners) { // Group Owners
@@ -100,9 +101,8 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	public void change(Event event, Object[] delta, ChangeMode mode) {
-		//noinspection ConstantConditions
-		if ((delta == null && mode != ChangeMode.DELETE && mode != ChangeMode.RESET) || (delta != null && delta.length == 0)) {
+	public void change(@NotNull Event event, Object @Nullable [] delta, @NotNull ChangeMode mode) {
+		if ((delta == null && mode != ChangeMode.DELETE && mode != ChangeMode.RESET)) {
 			return;
 		}
 
@@ -205,12 +205,12 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	public Class<?> getReturnType() {
+	public @NotNull Class<?> getReturnType() {
 		return groups ? String.class : OfflinePlayer.class;
 	}
 
 	@Override
-	public String toString(@Nullable Event event, boolean debug) {
+	public @NotNull String toString(@Nullable Event event, boolean debug) {
 		return "the " + (groups ? "group" : "player") + " "
 				+ (owners ? "owners" : "members")
 				+ " of " + getExpr().toString(event, debug);

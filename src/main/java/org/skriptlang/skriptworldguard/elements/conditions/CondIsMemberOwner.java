@@ -13,18 +13,19 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
-import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Is Member/Owner of Region")
 @Description("A condition that tests whether the given players or groups are a member or owner of the given regions.")
 @Examples({
 	"on region enter:",
-	"\tplayer is the owner of the region",
-	"\tmessage \"Welcome back to %region%!\"",
-	"\tsend \"%player% just entered %region%!\" to the members of the region"
+		"\tplayer is the owner of the region",
+		"\tmessage \"Welcome back to %region%!\"",
+		"\tsend \"%player% just entered %region%!\" to the members of the region"
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -37,15 +38,13 @@ public class CondIsMemberOwner extends Condition {
 		);
 	}
 
-	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<Object> users;
-	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<WorldGuardRegion> regions;
 	private boolean owner;
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
 		users = (Expression<Object>) exprs[0];
 		regions = (Expression<WorldGuardRegion>) exprs[1];
 		owner = parseResult.hasTag("owner");
@@ -54,7 +53,7 @@ public class CondIsMemberOwner extends Condition {
 	}
 
 	@Override
-	public boolean check(Event event) {
+	public boolean check(@NotNull Event event) {
 		WorldGuardRegion[] regions = this.regions.getAll(event);
 		return users.check(event, user -> {
 			if (user instanceof OfflinePlayer) {
@@ -78,7 +77,7 @@ public class CondIsMemberOwner extends Condition {
 	}
 
 	@Override
-	public String toString(@Nullable Event event, boolean debug) {
+	public @NotNull String toString(@Nullable Event event, boolean debug) {
 		boolean isSingle = users.isSingle();
 		return users.toString(event, debug) + " " + (isSingle ? "is" : "are")
 				+ (isNegated() ? " not" : "")

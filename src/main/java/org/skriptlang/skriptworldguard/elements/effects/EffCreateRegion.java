@@ -17,11 +17,12 @@ import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.Event;
-import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,6 @@ public class EffCreateRegion extends Effect {
 
 	// Shared Values
 	private boolean temporary;
-	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<String> id;
 	@Nullable
 	private Expression<World> world;
@@ -76,7 +76,7 @@ public class EffCreateRegion extends Effect {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
 		temporary = parseResult.hasTag("temporary");
 		id = (Expression<String>) exprs[0];
 		world = (Expression<World>) exprs[1];
@@ -92,7 +92,7 @@ public class EffCreateRegion extends Effect {
 	}
 
 	@Override
-	protected void execute(Event event) {
+	protected void execute(@NotNull Event event) {
 		String id = this.id.getSingle(event);
 		World world = this.world != null ? this.world.getSingle(event) : null; // May be null, but that is not necessarily a bad thing
 		if (id == null || !ProtectedRegion.isValidId(id)) {
@@ -161,7 +161,7 @@ public class EffCreateRegion extends Effect {
 	}
 
 	@Override
-	public String toString(@Nullable Event event, boolean debug) {
+	public @NotNull String toString(@Nullable Event event, boolean debug) {
 		if (firstCorner != null) { // Cuboid region
 			assert secondCorner != null;
 			return "create a new " + (temporary ? "temporary " : "") + "cuboid region named " + id.toString(event, debug)

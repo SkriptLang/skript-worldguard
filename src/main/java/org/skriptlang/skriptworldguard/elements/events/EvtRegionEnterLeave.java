@@ -7,11 +7,12 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.registrations.EventValues;
 import ch.njol.skript.util.Getter;
 import com.sk89q.worldguard.session.MoveType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.RegionEnterLeaveEvent;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.eclipse.jdt.annotation.Nullable;
 
 public class EvtRegionEnterLeave extends SkriptEvent {
 
@@ -46,20 +47,19 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 		}, EventValues.TIME_NOW);
 	}
 
-	@Nullable
-	private Literal<WorldGuardRegion> regions;
+	private @Nullable Literal<WorldGuardRegion> regions;
 	private boolean enter;
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean init(Literal<?>[] args, int matchedPattern, ParseResult parseResult) {
+	public boolean init(Literal<?>[] args, int matchedPattern, @NotNull ParseResult parseResult) {
 		regions = (Literal<WorldGuardRegion>) args[0];
 		enter = matchedPattern <= 1;
 		return true;
 	}
 
 	@Override
-	public boolean check(Event e) {
+	public boolean check(@NotNull Event e) {
 		RegionEnterLeaveEvent event = (RegionEnterLeaveEvent) e;
 		if (event.isEntering() != enter) { // This is a region enter event, but we want a region leave event
 			return false;
@@ -70,7 +70,7 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 	}
 
 	@Override
-	public String toString(@Nullable Event event, boolean debug) {
+	public @NotNull String toString(@Nullable Event event, boolean debug) {
 		return (enter ? "entering" : "leaving") + " of "
 				+ (regions == null ? "a region" : regions.toString(event, debug));
 	}

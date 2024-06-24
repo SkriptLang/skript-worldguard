@@ -13,23 +13,24 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.util.Direction;
 import ch.njol.util.Kleenean;
 import com.sk89q.worldedit.math.BlockVector3;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Can Build In Regions")
 @Description("A condition that tests whether the given players can build in the given regions or the regions of the given locations.")
 @Examples({
 	"command /setblock <material>:",
-	"\tdescription: set the block at your crosshair to a different type",
-	"\ttrigger:",
-	"\t\tif the player cannot build at the targeted block:",
-	"\t\t\tmessage \"<red>You do not have permission to change blocks there!\"",
-	"\t\telse:",
-	"\t\t\tset the targeted block to argument"
+		"\tdescription: set the block at your crosshair to a different type",
+		"\ttrigger:",
+			"\t\tif the player cannot build at the targeted block:",
+				"\t\t\tmessage \"<red>You do not have permission to change blocks there!\"",
+			"\t\telse:",
+				"\t\t\tset the targeted block to argument"
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -42,16 +43,13 @@ public class CondCanBuildInRegions extends Condition {
 		);
 	}
 
-	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<Player> players;
-	@Nullable
 	private Expression<Location> locations;
-	@Nullable
 	private Expression<WorldGuardRegion> regions;
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
 		players = (Expression<Player>) exprs[0];
 		if (exprs[1] != null) { // We are using directions and locations
 			locations = Direction.combine(
@@ -66,7 +64,7 @@ public class CondCanBuildInRegions extends Condition {
 	}
 
 	@Override
-	public boolean check(Event event) {
+	public boolean check(@NotNull Event event) {
 		if (locations != null) {
 			Location[] locations = this.locations.getAll(event);
 			return players.check(event, player -> SimpleExpression.check(
@@ -92,7 +90,7 @@ public class CondCanBuildInRegions extends Condition {
 	}
 
 	@Override
-	public String toString(@Nullable Event event, boolean debug) {
+	public @NotNull String toString(@Nullable Event event, boolean debug) {
 		assert (locations != null && regions == null) || (locations == null && regions != null);
 		return players.toString(event, debug) + " can build " + ((locations != null ? locations : regions).toString(event, debug));
 	}

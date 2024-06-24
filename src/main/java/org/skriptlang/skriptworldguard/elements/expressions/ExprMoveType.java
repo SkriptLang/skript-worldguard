@@ -10,13 +10,14 @@ import ch.njol.skript.expressions.base.EventValueExpression;
 import ch.njol.skript.lang.ExpressionType;
 import com.sk89q.worldguard.session.MoveType;
 import org.bukkit.event.Event;
-import org.eclipse.jdt.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Name("WorldGuard Move Type")
 @Description("The WorldGuard move type in a WorldGuard region enter/leave event.")
 @Examples({
 	"on region enter:",
-	"\tsend \"The move type is '%the move type%'\""
+		"\tsend \"The move type is '%the move type%'\""
 })
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
@@ -33,7 +34,7 @@ public class ExprMoveType extends EventValueExpression<MoveType> {
 	}
 
 	@Override
-	public String toString(@Nullable Event event, boolean debug) {
+	public @NotNull String toString(@Nullable Event event, boolean debug) {
 		return "the worldguard move type";
 	}
 

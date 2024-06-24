@@ -12,11 +12,12 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.util.Direction;
 import ch.njol.util.Kleenean;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
-import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +43,11 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 		);
 	}
 
-	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<Location> locations;
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
 		locations = Direction.combine(
 				(Expression<? extends Direction>) exprs[0],
 				(Expression<? extends Location>) exprs[1]
@@ -56,7 +56,7 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	protected WorldGuardRegion[] get(Event event) {
+	protected WorldGuardRegion @NotNull [] get(@NotNull Event event) {
 		Location[] locations = this.locations.getArray(event);
 		if (locations.length == 0) {
 			return new WorldGuardRegion[0];
@@ -74,12 +74,12 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	public Class<? extends WorldGuardRegion> getReturnType() {
+	public @NotNull Class<? extends WorldGuardRegion> getReturnType() {
 		return WorldGuardRegion.class;
 	}
 
 	@Override
-	public String toString(@Nullable Event event, boolean debug) {
+	public @NotNull String toString(@Nullable Event event, boolean debug) {
 		return "the regions " + locations.toString(event, debug);
 	}
 

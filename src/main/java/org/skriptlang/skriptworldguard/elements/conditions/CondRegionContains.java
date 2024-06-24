@@ -12,10 +12,11 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
-import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Region Contains")
 @Description("A condition that tests whether the given locations are inside of the given regions")
@@ -38,14 +39,12 @@ public class CondRegionContains extends Condition {
 		);
 	}
 
-	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<WorldGuardRegion> regions;
-	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<Location> locations;
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
 		boolean locationsFirst = matchedPattern % 2 != 0;
 		regions = (Expression<WorldGuardRegion>) exprs[locationsFirst ? 1 : 0];
 		locations = (Expression<Location>) exprs[locationsFirst ? 0 : 1];
@@ -54,7 +53,7 @@ public class CondRegionContains extends Condition {
 	}
 
 	@Override
-	public boolean check(Event event) {
+	public boolean check(@NotNull Event event) {
 		Location[] locations = this.locations.getAll(event);
 		return regions.check(event, region -> SimpleExpression.check(
 				locations,
@@ -65,7 +64,7 @@ public class CondRegionContains extends Condition {
 	}
 
 	@Override
-	public String toString(@Nullable Event event, boolean debug) {
+	public @NotNull String toString(@Nullable Event event, boolean debug) {
 		return regions.toString(event, debug) + " contain" + (regions.isSingle() ? "s" : "") +
 				" " + locations.toString(event, debug);
 	}
