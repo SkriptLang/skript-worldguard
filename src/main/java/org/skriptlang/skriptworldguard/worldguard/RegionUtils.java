@@ -4,6 +4,7 @@ import ch.njol.skript.util.AABB;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
+import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
@@ -12,6 +13,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -19,9 +21,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class RegionUtils {
 
@@ -136,9 +137,39 @@ public class RegionUtils {
 	 * - region data for the given world has failed to load
 	 * - support for regions has been disabled
 	 */
-	@Nullable
-	public static RegionManager getRegionManager(World world) {
+	public static @Nullable RegionManager getRegionManager(World world) {
 		return WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world));
+	}
+
+	/**
+	 * Get aall regions of all worlds
+	 * @return Array of {@link WorldGuardRegion}
+	 */
+	public static WorldGuardRegion @Nullable [] getRegions() {
+		return getRegions(null);
+	}
+
+	/**
+	 * Get all regions of all worlds or provide {@code world} to get all regions of that {@link World}
+	 * @param world The {@link World} to get regions from, or {@code null} to get regions from all worlds
+	 * @return Array of {@link WorldGuardRegion}
+	 */
+	public static WorldGuardRegion @Nullable [] getRegions(@Nullable World world) {
+		WorldGuardPlatform platform = WorldGuard.getInstance().getPlatform();
+		RegionContainer container = platform.getRegionContainer();
+		Map<World, RegionManager> managers = new HashMap<>();
+		if (world == null) {
+			for (World world1 : Bukkit.getWorlds())
+				managers.put(world1, container.get(BukkitAdapter.adapt(world1)));
+		} else {
+			managers.put(world, container.get(BukkitAdapter.adapt(world)));
+		}
+		List<WorldGuardRegion> regions = new ArrayList<>();
+		for (Entry<World, RegionManager> managerEntry : managers.entrySet()) {
+			for (Entry<String, ProtectedRegion> regionEntry : managerEntry.getValue().getRegions().entrySet())
+				regions.add(new WorldGuardRegion(managerEntry.getKey(), regionEntry.getValue()));
+		}
+		return regions.toArray(new WorldGuardRegion[0]);
 	}
 
 }
