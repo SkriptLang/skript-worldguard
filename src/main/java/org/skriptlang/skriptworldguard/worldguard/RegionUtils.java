@@ -142,8 +142,7 @@ public class RegionUtils {
 	}
 
 	/**
-	 * Get aall regions of all worlds
-	 * @return Array of {@link WorldGuardRegion}
+	 * @return All regions of all worlds
 	 */
 	public static WorldGuardRegion @Nullable [] getRegions() {
 		return getRegions(null);
@@ -152,7 +151,7 @@ public class RegionUtils {
 	/**
 	 * Get all regions of all worlds or provide {@code world} to get all regions of that {@link World}
 	 * @param world The {@link World} to get regions from, or {@code null} to get regions from all worlds
-	 * @return Array of {@link WorldGuardRegion}
+	 * @return All regions from the world, or all worlds if {@code world} is null.
 	 */
 	public static WorldGuardRegion @Nullable [] getRegions(@Nullable World world) {
 		WorldGuardPlatform platform = WorldGuard.getInstance().getPlatform();

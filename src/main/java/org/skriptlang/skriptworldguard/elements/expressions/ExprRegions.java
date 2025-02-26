@@ -45,21 +45,19 @@ public class ExprRegions extends SimpleExpression<WorldGuardRegion> {
 
 	@Override
 	protected WorldGuardRegion @Nullable [] get(Event event) {
-		if (worlds == null) {
+		if (worlds == null)
 			return RegionUtils.getRegions();
-		} else {
-			World[] worlds = this.worlds.getArray(event);
-			if (worlds.length == 0)
-				return null;
-			List<WorldGuardRegion> regions = new ArrayList<>();
-			for (World world : worlds) {
-				WorldGuardRegion[] worldRegions = RegionUtils.getRegions(world);
-				if (worldRegions == null || worldRegions.length == 0)
-					continue;
-				regions.addAll(Arrays.stream(worldRegions).collect(Collectors.toList()));
-			}
-			return regions.toArray(new WorldGuardRegion[0]);
+		World[] worlds = this.worlds.getArray(event);
+		if (worlds.length == 0)
+			return null;
+		List<WorldGuardRegion> regions = new ArrayList<>();
+		for (World world : worlds) {
+			WorldGuardRegion[] worldRegions = RegionUtils.getRegions(world);
+			if (worldRegions == null || worldRegions.length == 0)
+				continue;
+			regions.addAll(Arrays.stream(worldRegions).collect(Collectors.toList()));
 		}
+		return regions.toArray(new WorldGuardRegion[0]);
 	}
 
 	@Override
