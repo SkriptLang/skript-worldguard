@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Name("All Regions")
-@Description("Get all regions from all worlds or of aa specific world.")
+@Description("Get all regions from all worlds or of a specific world.")
 @Examples({
 		"send all regions",
 		"set {_regions::*} to the regions in world \"world\""
