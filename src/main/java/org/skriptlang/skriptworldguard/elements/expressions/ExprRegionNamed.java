@@ -27,8 +27,9 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 
 	static {
 		Skript.registerExpression(ExprRegionNamed.class, WorldGuardRegion.class, ExpressionType.COMBINED,
-				"[the] [worldguard] region[s] [with [the] (name[s]|id[s])|named] %strings% (in|of) [[the] world] %world%",
-				"[the] [worldguard] region[s] [with [the] (name[s]|id[s])|named] %strings% [%world%]"
+				"[the] [worldguard] region[s] [named] %strings% [(in|of) [[the] world] %world%]",
+				"[the] [worldguard] region[s] with [the] (name[s]|id[s]) %strings% [(in|of) [[the] world] %world%]"
+
 		);
 	}
 
