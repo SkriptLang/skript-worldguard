@@ -5,14 +5,13 @@ import ch.njol.skript.lang.Literal;
 import ch.njol.skript.lang.SkriptEvent;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.registrations.EventValues;
-import ch.njol.skript.util.Getter;
 import com.sk89q.worldguard.session.MoveType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skriptworldguard.worldguard.RegionEnterLeaveEvent;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 
 public class EvtRegionEnterLeave extends SkriptEvent {
 
@@ -27,24 +26,12 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 						"\tsend \"You entered %region%\"")
 				.requiredPlugins("WorldGuard 7")
 				.since("1.0");
-		EventValues.registerEventValue(RegionEnterLeaveEvent.class, WorldGuardRegion.class, new Getter<WorldGuardRegion, RegionEnterLeaveEvent>() {
-			@Override
-			public WorldGuardRegion get(RegionEnterLeaveEvent event) {
-				return event.getRegion();
-			}
-		}, EventValues.TIME_NOW);
-		EventValues.registerEventValue(RegionEnterLeaveEvent.class, Player.class, new Getter<Player, RegionEnterLeaveEvent>() {
-			@Override
-			public Player get(RegionEnterLeaveEvent event) {
-				return event.getPlayer();
-			}
-		}, EventValues.TIME_NOW);
-		EventValues.registerEventValue(RegionEnterLeaveEvent.class, MoveType.class, new Getter<MoveType, RegionEnterLeaveEvent>() {
-			@Override
-			public MoveType get(RegionEnterLeaveEvent e) {
-				return e.getMoveType();
-			}
-		}, EventValues.TIME_NOW);
+		EventValues.registerEventValue(RegionEnterLeaveEvent.class, WorldGuardRegion.class,
+					RegionEnterLeaveEvent::getRegion, EventValues.TIME_NOW);
+		EventValues.registerEventValue(RegionEnterLeaveEvent.class, Player.class,
+				RegionEnterLeaveEvent::getPlayer, EventValues.TIME_NOW);
+		EventValues.registerEventValue(RegionEnterLeaveEvent.class, MoveType.class,
+				RegionEnterLeaveEvent::getMoveType, EventValues.TIME_NOW);
 	}
 
 	private @Nullable Literal<WorldGuardRegion> regions;
@@ -59,14 +46,15 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 	}
 
 	@Override
-	public boolean check(@NotNull Event e) {
-		RegionEnterLeaveEvent event = (RegionEnterLeaveEvent) e;
-		if (event.isEntering() != enter) { // This is a region enter event, but we want a region leave event
+	public boolean check(@NotNull Event event) {
+		if (!(event instanceof RegionEnterLeaveEvent enterLeaveEvent))
+			return false;
+		if (enterLeaveEvent.isEntering() != enter) { // This is a region enter event, but we want a region leave event
 			return false;
 		} else if (regions == null) { // There are no regions to check so it is valid
 			return true;
 		}
-		return regions.check(event, region -> region.equals(event.getRegion()));
+		return regions.check(enterLeaveEvent, region -> region.equals(enterLeaveEvent.getRegion()));
 	}
 
 	@Override

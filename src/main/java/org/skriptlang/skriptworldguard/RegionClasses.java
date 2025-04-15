@@ -31,7 +31,7 @@ public class RegionClasses {
 				.examples("region \"region\" in world(\"world\"")
 				.requiredPlugins("WorldGuard 7")
 				.since("1.0")
-				.parser(new Parser<WorldGuardRegion>() {
+				.parser(new Parser<>() {
 					// TODO maybe we should do something else here... perhaps make use of SkriptParser methods?
 					final Pattern regionPattern = Pattern.compile(
 							"(?:the )?(?:worldguard )?region (?:with (?:the )?(?:name|id) |named )?\"(.+)\" (?:in|of) (?:(?:the )?world )?\"(.+)\""
@@ -115,7 +115,7 @@ public class RegionClasses {
 				.examples("on region enter:",
 						"\tsend \"The move type is %the move type%\"")
 				.since("1.0")
-				.parser(new Parser<MoveType>() {
+				.parser(new Parser<>() {
 					@Override
 					@Nullable
 					public MoveType parse(@NotNull String input, @NotNull ParseContext context) {
