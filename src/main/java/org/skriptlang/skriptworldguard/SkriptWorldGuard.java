@@ -28,8 +28,8 @@ public class SkriptWorldGuard extends JavaPlugin {
 			getLogger().severe("Could not find Skript! Make sure you have it installed and that it properly loaded. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
-		} else if (Skript.getVersion().isSmallerThan(new Version(2, 6, 3))) {
-			getLogger().severe("You are running an unsupported version of Skript. Please update to at least Skript 2.6.3. Disabling...");
+		} else if (Skript.getVersion().isSmallerThan(new Version(2, 10, 0))) {
+			getLogger().severe("You are running an unsupported version of Skript. Please update to at least Skript 2.10.0. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
