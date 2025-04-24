@@ -9,5 +9,5 @@ Report it at https://github.com/SkriptLang/skript-worldguard/issues.
 Tutorials are available on the wiki at https://github.com/SkriptLang/skript-worldguard/wiki.
 
 ## Requirements
-skript-worldguard is designed for Skript 2.6.3 and above.
-It works with all Minecraft versions supported by Skript 2.6.3.
+skript-worldguard is designed for Skript 2.10.0 and above.
+It works with all Minecraft versions supported by Skript 2.10.0.

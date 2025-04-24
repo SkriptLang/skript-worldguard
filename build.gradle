@@ -11,7 +11,7 @@ compileJava.options.encoding = 'UTF-8'
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
@@ -25,14 +25,13 @@ repositories {
 
 dependencies {
     // eclipse annotations are only present for IDE analysis, they should not be used
-    implementation group: 'org.eclipse.jdt', name: 'org.eclipse.jdt.annotation', version: '2.2.600'
     implementation group: 'org.jetbrains', name: 'annotations', version: '24.1.0'
 
-    implementation group: 'org.spigotmc', name: 'spigot-api', version: '1.13.2-R0.1-SNAPSHOT'
-    implementation (group: 'com.github.SkriptLang', name: 'Skript', version: '2.7.3') {
+    implementation group: 'org.spigotmc', name: 'spigot-api', version: '1.19.4-R0.1-SNAPSHOT'
+    implementation (group: 'com.github.SkriptLang', name: 'Skript', version: '2.11.0') {
         transitive = false
     }
-    implementation (group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.0') {
+    implementation (group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.8') {
         exclude module: 'bstats-bukkit'
     }
 }
