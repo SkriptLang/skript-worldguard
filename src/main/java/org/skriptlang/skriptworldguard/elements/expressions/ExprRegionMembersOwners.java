@@ -13,6 +13,7 @@ import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -36,8 +37,9 @@ import java.util.UUID;
 @Since("1.0")
 public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion, Object> {
 
-	static {
-		register(ExprRegionMembersOwners.class, Object.class, "[player|:group] (members|:owners)", "worldguardregions");
+	public static void register(SyntaxRegistry registry) {
+		register(registry, ExprRegionMembersOwners.class, Object.class,
+				"[player|:group] (members|:owners)", "worldguardregions");
 	}
 
 	private boolean groups;

@@ -1,6 +1,5 @@
 package org.skriptlang.skriptworldguard.elements.conditions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -17,6 +16,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
@@ -35,11 +36,12 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 @Since("1.0")
 public class CondCanBuildInRegions extends Condition {
 
-	static {
-		Skript.registerCondition(CondCanBuildInRegions.class,
-				"%players% (can|(is|are) allowed to) build (%-directions% %-locations%|[in] %-worldguardregions%)",
-				"%players% (can('t|not)|(is|are)(n't| not) allowed to) build (%-directions% %-locations%|[in] %-worldguardregions%)"
-		);
+	public static void register(SyntaxRegistry registry) {
+		registry.register(SyntaxRegistry.CONDITION, SyntaxInfo.builder(CondCanBuildInRegions.class)
+				.supplier(CondCanBuildInRegions::new)
+				.addPatterns("%players% (can|(is|are) allowed to) build (%-directions% %-locations%|[in] %-worldguardregions%)",
+						"%players% (can('t|not)|(is|are)(n't| not) allowed to) build (%-directions% %-locations%|[in] %-worldguardregions%)")
+				.build());
 	}
 
 	private Expression<Player> players;

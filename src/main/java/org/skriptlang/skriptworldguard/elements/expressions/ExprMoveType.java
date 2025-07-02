@@ -1,17 +1,16 @@
 package org.skriptlang.skriptworldguard.elements.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.EventValueExpression;
-import ch.njol.skript.lang.ExpressionType;
 import com.sk89q.worldguard.session.MoveType;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("WorldGuard Move Type")
 @Description("The WorldGuard move type in a WorldGuard region enter/leave event.")
@@ -23,10 +22,8 @@ import org.jetbrains.annotations.Nullable;
 @Since("1.0")
 public class ExprMoveType extends EventValueExpression<MoveType> {
 
-	static {
-		Skript.registerExpression(ExprMoveType.class, MoveType.class, ExpressionType.SIMPLE,
-				"[the] [worldguard] move[ ]type"
-		);
+	public static void register(SyntaxRegistry registry) {
+		register(registry, ExprMoveType.class, MoveType.class, "[worldguard] move[ ]type");
 	}
 
 	public ExprMoveType() {

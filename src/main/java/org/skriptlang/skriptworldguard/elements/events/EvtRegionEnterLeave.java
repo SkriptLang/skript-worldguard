@@ -1,6 +1,5 @@
 package org.skriptlang.skriptworldguard.elements.events;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.lang.Literal;
 import ch.njol.skript.lang.SkriptEvent;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
@@ -10,28 +9,33 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.bukkit.registration.BukkitRegistryKeys;
+import org.skriptlang.skript.bukkit.registration.BukkitSyntaxInfos;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.RegionEnterLeaveEvent;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
 public class EvtRegionEnterLeave extends SkriptEvent {
 
-	static {
-		Skript.registerEvent("WorldGuard Region Enter", EvtRegionEnterLeave.class, RegionEnterLeaveEvent.class,
-				"enter[ing] of ([a] region|%-worldguardregions%)",
-				"(region|%-worldguardregions%) enter[ing]",
-				"(leav(e|ing)|exit[ing]) of ([a] region|%-worldguardregions%)",
-				"(region|%-worldguardregions%) (leav(e|ing)|exit[ing])")
-				.description("Called when a player enters or leaves a region or the given region(s)")
-				.examples("on region enter:",
-						"\tsend \"You entered %region%\"")
-				.requiredPlugins("WorldGuard 7")
-				.since("1.0");
-		EventValues.registerEventValue(RegionEnterLeaveEvent.class, WorldGuardRegion.class,
-					RegionEnterLeaveEvent::getRegion, EventValues.TIME_NOW);
-		EventValues.registerEventValue(RegionEnterLeaveEvent.class, Player.class,
-				RegionEnterLeaveEvent::getPlayer, EventValues.TIME_NOW);
-		EventValues.registerEventValue(RegionEnterLeaveEvent.class, MoveType.class,
-				RegionEnterLeaveEvent::getMoveType, EventValues.TIME_NOW);
+	public static void register(SyntaxRegistry registry) {
+		registry.register(BukkitRegistryKeys.EVENT, BukkitSyntaxInfos.Event.builder(EvtRegionEnterLeave.class, "WorldGuard Region Enter")
+				.supplier(EvtRegionEnterLeave::new)
+				.addEvent(RegionEnterLeaveEvent.class)
+				.addPatterns("enter[ing] of ([a] region|%-worldguardregions%)",
+						"(region|%-worldguardregions%) enter[ing]",
+						"(leav(e|ing)|exit[ing]) of ([a] region|%-worldguardregions%)",
+						"(region|%-worldguardregions%) (leav(e|ing)|exit[ing])")
+				.addDescription("Called when a player enters or leaves a region (or the specified region(s))")
+				.addExample("""
+						on region enter:
+							send "You entered %region%"
+						""")
+				.addRequiredPlugin("WorldGuard 7")
+				.addSince("1.0")
+				.build());
+		EventValues.registerEventValue(RegionEnterLeaveEvent.class, WorldGuardRegion.class, RegionEnterLeaveEvent::getRegion);
+		EventValues.registerEventValue(RegionEnterLeaveEvent.class, Player.class, RegionEnterLeaveEvent::getPlayer);
+		EventValues.registerEventValue(RegionEnterLeaveEvent.class, MoveType.class, RegionEnterLeaveEvent::getMoveType);
 	}
 
 	private @Nullable Literal<WorldGuardRegion> regions;

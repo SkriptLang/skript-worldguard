@@ -8,6 +8,7 @@ import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Is Valid Region ID")
 @Description({
@@ -19,8 +20,8 @@ import org.jetbrains.annotations.NotNull;
 @Since("1.0")
 public class CondIsValidId extends PropertyCondition<String> {
 
-	static {
-		register(CondIsValidId.class, "[a] valid [worldguard] region id", "strings");
+	public static void register(SyntaxRegistry registry) {
+		register(registry, CondIsValidId.class, "[a] valid [worldguard] region id", "strings");
 	}
 
 	@Override

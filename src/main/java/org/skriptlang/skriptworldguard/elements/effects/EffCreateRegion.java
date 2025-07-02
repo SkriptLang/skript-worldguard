@@ -19,6 +19,8 @@ import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -48,12 +50,13 @@ import java.util.List;
 @Since("1.0")
 public class EffCreateRegion extends Effect {
 
-	static {
-		Skript.registerEffect(EffCreateRegion.class,
-				"create [a] [:temporary] global [worldguard] region [named] %string% [in %world%]",
-				"create [a] [:temporary] [cuboid|rectangular] [worldguard] region [named] %string% [in %-world%] (between|from) %location% (to|and) %location%",
-				"create [a] [:temporary] polygonal [worldguard] region [named] %string% [in %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%"
-		);
+	public static void register(SyntaxRegistry registry) {
+		registry.register(SyntaxRegistry.EFFECT, SyntaxInfo.builder(EffCreateRegion.class)
+				.supplier(EffCreateRegion::new)
+				.addPatterns("create [a] [:temporary] global [worldguard] region [named] %string% [in %world%]",
+						"create [a] [:temporary] [cuboid|rectangular] [worldguard] region [named] %string% [in %-world%] (between|from) %location% (to|and) %location%",
+						"create [a] [:temporary] polygonal [worldguard] region [named] %string% [in %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%")
+				.build());
 	}
 
 	// Shared Values

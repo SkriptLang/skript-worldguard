@@ -1,19 +1,19 @@
 package org.skriptlang.skriptworldguard.elements.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.util.Direction;
 import ch.njol.util.Kleenean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
@@ -37,10 +37,11 @@ import java.util.List;
 @Since("1.0")
 public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 
-	static {
-		Skript.registerExpression(ExprRegionsAt.class, WorldGuardRegion.class, ExpressionType.PROPERTY,
-				"[the] regions %direction% %locations%"
-		);
+	public static void register(SyntaxRegistry registry) {
+		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegionsAt.class, WorldGuardRegion.class)
+				.supplier(ExprRegionsAt::new)
+				.addPattern("[the] regions %direction% %locations%")
+				.build());
 	}
 
 	private Expression<Location> locations;

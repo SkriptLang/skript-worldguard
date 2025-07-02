@@ -11,6 +11,7 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.block.Block;
@@ -27,8 +28,8 @@ import java.util.List;
 @Since("1.0")
 public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Block> {
 
-	static {
-		register(ExprBlocksInRegion.class, Block.class, "blocks", "worldguardregions");
+	public static void register(SyntaxRegistry registry) {
+		register(registry, ExprBlocksInRegion.class, Block.class, "blocks", "worldguardregions");
 	}
 
 	@Override

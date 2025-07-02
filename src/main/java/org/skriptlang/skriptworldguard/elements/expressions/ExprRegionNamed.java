@@ -1,18 +1,18 @@
 package org.skriptlang.skriptworldguard.elements.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.World;
@@ -25,12 +25,12 @@ import org.bukkit.event.Event;
 @Since("1.0")
 public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 
-	static {
-		Skript.registerExpression(ExprRegionNamed.class, WorldGuardRegion.class, ExpressionType.COMBINED,
-				"[the] [worldguard] region[s] [named] %strings% [(in|of) [[the] world] %world%]",
-				"[the] [worldguard] region[s] with [the] (name[s]|id[s]) %strings% [(in|of) [[the] world] %world%]"
-
-		);
+	public static void register(SyntaxRegistry registry) {
+		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegionNamed.class, WorldGuardRegion.class)
+				.supplier(ExprRegionNamed::new)
+				.addPatterns("[the] [worldguard] region[s] [named] %strings% [(in|of) [[the] world] %world%]",
+						"[the] [worldguard] region[s] with [the] (name[s]|id[s]) %strings% [(in|of) [[the] world] %world%]")
+				.build());
 	}
 
 	private Expression<String> ids;

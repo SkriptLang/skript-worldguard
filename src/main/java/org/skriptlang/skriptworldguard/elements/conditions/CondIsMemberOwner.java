@@ -1,6 +1,7 @@
 package org.skriptlang.skriptworldguard.elements.conditions;
 
-import ch.njol.skript.Skript;
+import ch.njol.skript.conditions.base.PropertyCondition;
+import ch.njol.skript.conditions.base.PropertyCondition.PropertyType;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -15,6 +16,8 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
@@ -31,11 +34,13 @@ import org.bukkit.event.Event;
 @Since("1.0")
 public class CondIsMemberOwner extends Condition {
 
-	static {
-		Skript.registerCondition(CondIsMemberOwner.class,
-				"%offlineplayers/strings% (is|are) ([a] member|owner:[the|an] owner) of %worldguardregions%",
-				"%offlineplayers/strings% (is|are)(n't| not) ([a] member|owner:[the|an] owner) of %worldguardregions%"
-		);
+	public static void register(SyntaxRegistry registry) {
+		registry.register(SyntaxRegistry.CONDITION, SyntaxInfo.builder(CondIsMemberOwner.class)
+				.supplier(CondIsMemberOwner::new)
+				.addPatterns(PropertyCondition.getPatterns(PropertyType.BE,
+						"([a] member|owner:[the|an] owner) of %worldguardregions%",
+						"offlineplayers/strings"))
+				.build());
 	}
 
 	private Expression<Object> users;

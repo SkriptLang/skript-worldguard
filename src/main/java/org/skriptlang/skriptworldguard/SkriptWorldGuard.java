@@ -10,6 +10,7 @@ import ch.njol.skript.hooks.regions.PreciousStonesHook;
 import ch.njol.skript.hooks.regions.ResidenceHook;
 import ch.njol.skript.hooks.regions.WorldGuardHook;
 import ch.njol.skript.lang.ParseContext;
+import ch.njol.skript.lang.SyntaxElement;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.Version;
 import ch.njol.yggdrasil.Fields;
@@ -23,12 +24,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.addon.SkriptAddon;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skript.util.ClassLoader;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardEventHandler.Factory;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
 import java.io.StreamCorruptedException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -181,6 +184,15 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 				.basePackage("org.skriptlang.skriptworldguard.elements")
 				.deep(true)
 				.initialize(true)
+				.forEachClass(clazz -> {
+					if (SyntaxElement.class.isAssignableFrom(clazz)) {
+						try {
+							clazz.getMethod("register", SyntaxRegistry.class).invoke(null, addon.syntaxRegistry());
+						} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+							getLogger().severe("Failed to load syntax class: " + e);
+						}
+					}
+				})
 				.build()
 				.loadClasses(SkriptWorldGuard.class, getFile());
 	}

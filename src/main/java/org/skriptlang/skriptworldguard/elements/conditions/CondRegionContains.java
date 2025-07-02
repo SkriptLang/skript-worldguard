@@ -14,6 +14,8 @@ import ch.njol.util.Kleenean;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
@@ -30,13 +32,15 @@ import org.bukkit.event.Event;
 @Since("1.0")
 public class CondRegionContains extends Condition {
 
-	static { // TODO see what can be done about requiring 'region' as it looks quite dumb in region events with the region expression
-		Skript.registerCondition(CondRegionContains.class,
-				"[the] [worldguard] region %worldguardregions% contain[s] %locations%",
-				"%locations% (is|are) ([contained] in|part of) [the] [worldguard] region %worldguardregions%",
-				"[the] [worldguard] region %worldguardregions% (do|does)(n't| not) contain %locations%",
-				"%locations% (is|are)(n't| not) (contained in|part of) [the] [worldguard] region %worldguardregions%"
-		);
+	public static void register(SyntaxRegistry registry) {
+		// TODO see what can be done about requiring 'region' as it looks quite dumb in region events with the region expression
+		registry.register(SyntaxRegistry.CONDITION, SyntaxInfo.builder(CondRegionContains.class)
+				.supplier(CondRegionContains::new)
+				.addPatterns("[the] [worldguard] region %worldguardregions% contain[s] %locations%",
+						"%locations% (is|are) ([contained] in|part of) [the] [worldguard] region %worldguardregions%",
+						"[the] [worldguard] region %worldguardregions% (do|does)(n't| not) contain %locations%",
+						"%locations% (is|are)(n't| not) (contained in|part of) [the] [worldguard] region %worldguardregions%")
+				.build());
 	}
 
 	private Expression<WorldGuardRegion> regions;
