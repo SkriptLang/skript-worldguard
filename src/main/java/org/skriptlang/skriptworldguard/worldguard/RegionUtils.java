@@ -7,6 +7,9 @@ import com.sk89q.worldedit.regions.Polygonal2DRegion;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.RegionResultSet;
+import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
@@ -17,11 +20,14 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RegionUtils {
 
@@ -70,7 +76,13 @@ public class RegionUtils {
 		return regions;
 	}
 
-	public static boolean canBuild(Player player, Location location) {
+	/**
+	 * Tests if a player can build at a given location.
+	 * @param player The player to test with
+	 * @param location The location to test at
+	 * @return Whether the given player can build at the location.
+	 */
+	public static boolean canBuild(Player player, @NotNull Location location) {
 		World world = location.getWorld();
 		if (world == null) {
 			return false;
@@ -81,6 +93,22 @@ public class RegionUtils {
 		}
 		return getRegionContainer().createQuery().testBuild(BukkitAdapter.adapt(location), WorldGuardPlugin.inst().wrapPlayer(player));
 	}
+
+	/**
+	 * Tests if a player can build in all the given regions.
+	 * @param player The player to test with
+	 * @param regions The regions to test against
+	 * @return Whether the given player can build in all the regions.
+	 */
+	public static boolean canBuild(Player player, WorldGuardRegion... regions) {
+		// create queryable set of regions
+		ApplicableRegionSet regionSet = new RegionResultSet(
+                (List<ProtectedRegion>) Arrays.stream(regions)
+                        .map(WorldGuardRegion::getRegion)
+                        .collect(Collectors.toCollection(ArrayList::new)), null);
+		return regionSet.testState(WorldGuardPlugin.inst().wrapPlayer(player), Flags.BUILD);
+	}
+
 
 	public static List<Block> getBlocksInRegion(WorldGuardRegion region) {
 		ProtectedRegion protectedRegion = region.getRegion();
