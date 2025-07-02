@@ -12,14 +12,13 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.util.Direction;
 import ch.njol.util.Kleenean;
-import com.sk89q.worldedit.math.BlockVector3;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
-import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
+import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
 @Name("Can Build In Regions")
 @Description("A condition that tests whether the given players can build in the given regions or the regions of the given locations.")
@@ -66,7 +65,7 @@ public class CondCanBuildInRegions extends Condition {
 	@Override
 	public boolean check(@NotNull Event event) {
 		if (locations != null) {
-			Location[] locations = this.locations.getAll(event);
+			Location[] locations = this.locations.getAll(event); // get all to avoid double-eval + permit or lists.
 			return players.check(event, player -> SimpleExpression.check(
 					locations,
 					location -> RegionUtils.canBuild(player, location),
@@ -75,14 +74,10 @@ public class CondCanBuildInRegions extends Condition {
 			), isNegated());
 		} else {
 			assert regions != null;
-			WorldGuardRegion[] regions = this.regions.getAll(event);
+			WorldGuardRegion[] regions = this.regions.getAll(event); // get all to avoid double-eval + permit or lists.
 			return players.check(event, player -> SimpleExpression.check(
 					regions,
-					region -> { // Convert region to location essentially
-							BlockVector3 minPoint = region.getRegion().getMinimumPoint();
-							Location location = new Location(region.getWorld(), minPoint.getX(), minPoint.getY(), minPoint.getZ());
-							return RegionUtils.canBuild(player, location);
-					},
+					region -> RegionUtils.canBuild(player, region),
 					false,
 					this.regions.getAnd()
 			), isNegated());
