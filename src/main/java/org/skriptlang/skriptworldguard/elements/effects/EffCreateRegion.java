@@ -50,7 +50,7 @@ public class EffCreateRegion extends Effect {
 
 	static {
 		Skript.registerEffect(EffCreateRegion.class,
-				"create [a] [:temporary] global [worldguard] region [named] %string% in %world%",
+				"create [a] [:temporary] global [worldguard] region [named] %string% [in %world%]",
 				"create [a] [:temporary] [cuboid|rectangular] [worldguard] region [named] %string% [in %-world%] (between|from) %location% (to|and) %location%",
 				"create [a] [:temporary] polygonal [worldguard] region [named] %string% [in %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%"
 		);
