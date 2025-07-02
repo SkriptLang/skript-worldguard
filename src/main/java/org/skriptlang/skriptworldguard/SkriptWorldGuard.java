@@ -1,39 +1,65 @@
 package org.skriptlang.skriptworldguard;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.SkriptAddon;
+import ch.njol.skript.classes.ClassInfo;
+import ch.njol.skript.classes.EnumClassInfo;
+import ch.njol.skript.classes.Parser;
+import ch.njol.skript.classes.Serializer;
 import ch.njol.skript.hooks.regions.GriefPreventionHook;
 import ch.njol.skript.hooks.regions.PreciousStonesHook;
 import ch.njol.skript.hooks.regions.ResidenceHook;
 import ch.njol.skript.hooks.regions.WorldGuardHook;
+import ch.njol.skript.lang.ParseContext;
+import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.Version;
+import ch.njol.yggdrasil.Fields;
 import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.session.MoveType;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.addon.AddonModule;
+import org.skriptlang.skript.addon.SkriptAddon;
+import org.skriptlang.skript.util.ClassLoader;
+import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardEventHandler.Factory;
+import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
-import java.io.IOException;
+import java.io.StreamCorruptedException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class SkriptWorldGuard extends JavaPlugin {
+public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 
 	private static SkriptWorldGuard instance;
 
+	public static SkriptWorldGuard getInstance() {
+		return instance;
+	}
+
+	@Override
+	public void onLoad() {
+		// Disable all regions hooks so that Skript doesn't load any of its region syntax
+		Skript.disableHookRegistration(GriefPreventionHook.class, PreciousStonesHook.class,
+				ResidenceHook.class, WorldGuardHook.class);
+	}
+
 	@Override
 	public void onEnable() {
-
 		// Dependency Searching
-
 		Plugin skript = getServer().getPluginManager().getPlugin("Skript");
 		if (skript == null || !skript.isEnabled()) {
 			getLogger().severe("Could not find Skript! Make sure you have it installed and that it properly loaded. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
-		} else if (Skript.getVersion().isSmallerThan(new Version(2, 12, 0))) {
+		} else if (Skript.getVersion().isSmallerThan(new Version("2.12.0-pre1"))) {
 			getLogger().severe("You are running an unsupported version of Skript. Please update to at least Skript 2.10.0. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
-
 		Plugin worldGuard = getServer().getPluginManager().getPlugin("WorldGuard");
 		if (worldGuard == null || !worldGuard.isEnabled()) {
 			getLogger().severe("Could not find WorldGuard! Make sure you have it installed and that it properly loaded. Disabling...");
@@ -45,37 +71,118 @@ public class SkriptWorldGuard extends JavaPlugin {
 			return;
 		}
 
+		// Start Initialization
+		instance = this;
+
 		// Initialize WorldGuard Event Handler
 		WorldGuard.getInstance().getPlatform().getSessionManager().registerHandler(new Factory(), null);
 
-		// Start Initialization
-
-		instance = this;
-
 		// Register with Skript
-
-		SkriptAddon addon = Skript.registerAddon(this);
-		try {
-			addon.setLanguageFileDirectory("lang"); // Register ClassInfo lang definitions with Skript
-			new RegionClasses(); // Register ClassInfos with Skript
-			addon.loadClasses("org.skriptlang.skriptworldguard.elements");
-		} catch (IOException e) {
-			getLogger().severe("An error occurred while trying to register and load the addon with Skript. Disabling...");
-			getLogger().severe("Printing StackTrace:");
-			e.printStackTrace();
-			getServer().getPluginManager().disablePlugin(this);
-		}
-
-		// Skript hooks are disabled in a delayed startup task so this should be okay to do now
-		// Disable all regions hooks so that Skript doesn't load any of its region syntax
-		Skript.disableHookRegistration(
-				GriefPreventionHook.class, PreciousStonesHook.class, ResidenceHook.class, WorldGuardHook.class
-		);
-
+		SkriptAddon addon = Skript.instance().registerAddon(SkriptWorldGuard.class, "skript-worldguard");
+		addon.localizer().setSourceDirectories("lang", null);
+		addon.loadModules(this);
 	}
 
-	public static SkriptWorldGuard getInstance() {
-		return instance;
+	@Override
+	public void init(SkriptAddon addon) {
+		Classes.registerClass(new ClassInfo<>(WorldGuardRegion.class, "worldguardregion")
+				.user("worldguard ?regions?")
+				.name("Region")
+				.description("A WorldGuard region.")
+				.examples("region \"region\" in world(\"world\"")
+				.requiredPlugins("WorldGuard 7")
+				.since("1.0")
+				.parser(new Parser<>() {
+					// TODO maybe we should do something else here... perhaps make use of SkriptParser methods?
+					final Pattern regionPattern = Pattern.compile(
+							"(?:the )?(?:worldguard )?region (?:with (?:the )?(?:name|id) |named )?\"(.+)\" (?:in|of) (?:(?:the )?world )?\"(.+)\""
+					);
+
+					@Override
+					public @Nullable WorldGuardRegion parse(@NotNull String input, @NotNull ParseContext context) {
+						if (context == ParseContext.EVENT || context == ParseContext.COMMAND) {
+							Matcher matcher = regionPattern.matcher(input);
+							if (matcher.matches()) {
+								String id = matcher.group(1);
+								World world = Bukkit.getWorld(matcher.group(2));
+								return world == null ? null : RegionUtils.getRegion(world, id);
+							}
+						}
+						return null;
+					}
+
+					@Override
+					public boolean canParse(@NotNull ParseContext context) {
+						return context == ParseContext.EVENT || context == ParseContext.COMMAND;
+					}
+
+					@Override
+					public @NotNull String toString(WorldGuardRegion region, int flags) {
+						return region.toString();
+					}
+
+					@Override
+					public @NotNull String toVariableNameString(WorldGuardRegion region) {
+						return "worldguardregion:" + region;
+					}
+				})
+				.serializer(new Serializer<>() {
+					@Override
+					public @NotNull Fields serialize(WorldGuardRegion region) {
+						Fields fields = new Fields();
+						fields.putObject("world", region.getWorld());
+						fields.putObject("id", region.getRegion().getId());
+						return fields;
+					}
+
+					@Override
+					public void deserialize(WorldGuardRegion region, @NotNull Fields fields) {
+						assert false;
+					}
+
+					@Override
+					protected WorldGuardRegion deserialize(@NotNull Fields fields) throws StreamCorruptedException {
+						World world = fields.getObject("world", World.class);
+						String id = fields.getObject("id", String.class);
+						if (world == null || id == null) {
+							throw new StreamCorruptedException();
+						}
+						WorldGuardRegion region = RegionUtils.getRegion(world, id);
+						if (region == null) {
+							throw new StreamCorruptedException("The " + RegionUtils.toString(world, id) + " from WorldGuard could not be found. Does it still exist?");
+						}
+						return region;
+					}
+
+					@Override
+					public boolean mustSyncDeserialization() {
+						return true;
+					}
+
+					@Override
+					protected boolean canBeInstantiated() {
+						return false;
+					}
+				}));
+
+		Classes.registerClass(new EnumClassInfo<>(MoveType.class, "worldguardmovetype", "worldguard move types")
+				.user("worldguard ?move ?types?")
+				.name("WorldGuard Move Type")
+				.description("The move type in a WorldGuard enter/leave event.")
+				.requiredPlugins("WorldGuard 7")
+				.examples("on region enter:",
+						"\tsend \"The move type is %the move type%\"")
+				.since("1.0"));
+	}
+
+	@Override
+	public void load(SkriptAddon addon) {
+		ClassLoader.builder()
+				.basePackage("org.skriptlang.skriptworldguard.elements")
+				.deep(true)
+				.initialize(true)
+				.build()
+				.loadClasses(SkriptWorldGuard.class, getFile());
 	}
 
 }
