@@ -90,20 +90,15 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	public Class<?>[] acceptChange(ChangeMode mode) {
+	public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
 		return switch (mode) {
-			case ADD, SET, REMOVE, DELETE, RESET ->
-					isGroups ? CollectionUtils.array(String[].class) : CollectionUtils.array(OfflinePlayer[].class);
+			case ADD, SET, REMOVE, DELETE, RESET -> new Class[]{isGroups ? String[].class : OfflinePlayer[].class};
 			default -> null;
 		};
 	}
 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
-		if ((delta == null && mode != ChangeMode.DELETE && mode != ChangeMode.RESET)) {
-			return;
-		}
-
 		WorldGuardRegion[] regions = getExpr().getArray(event);
 		if (regions.length == 0) {
 			return;
@@ -128,10 +123,12 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 					for (DefaultDomain domain : domains) {
 						domain.getGroupDomain().clear();
 					}
-					if (mode == ChangeMode.DELETE || mode == ChangeMode.RESET) { // Don't fall through
+					if (mode != ChangeMode.SET) { // Only fall through for SET
 						break;
 					}
+					//$FALL-THROUGH$
 				case ADD:
+					assert delta != null;
 					for (DefaultDomain domain : domains) {
 						for (Object group : delta) {
 							domain.addGroup((String) group);
@@ -139,6 +136,7 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 					}
 					break;
 				case REMOVE:
+					assert delta != null;
 					for (DefaultDomain domain : domains) {
 						for (Object group : delta) {
 							domain.removeGroup((String) group);
@@ -156,10 +154,12 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 					for (DefaultDomain domain : domains) {
 						domain.getPlayerDomain().clear();
 					}
-					if (mode == ChangeMode.DELETE || mode == ChangeMode.RESET) { // Don't fall through
+					if (mode != ChangeMode.SET) { // Only fall through for SET
 						break;
 					}
+					//$FALL-THROUGH$
 				case ADD:
+					assert delta != null;
 					for (DefaultDomain domain : domains) {
 						for (Object player : delta) {
 							domain.addPlayer(((OfflinePlayer) player).getUniqueId());
@@ -167,6 +167,7 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 					}
 					break;
 				case REMOVE:
+					assert delta != null;
 					for (DefaultDomain domain : domains) {
 						for (Object player : delta) {
 							domain.removePlayer(((OfflinePlayer) player).getUniqueId());

@@ -15,7 +15,7 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 	"Valid region IDs only contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, or forward slashes."
 })
 @Example("""
-	command createregion <text>:
+	command /createregion <text>:
 		if the text-argument is not a valid region id:
 			message "<red>'%text-argument%' is not a valid region ID")
 		# here is where the rest of the command would go :)
