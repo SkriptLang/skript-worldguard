@@ -1,11 +1,11 @@
 package org.skriptlang.skriptworldguard.worldguard;
 
 import ch.njol.skript.lang.util.common.AnyContains;
+import ch.njol.skript.lang.util.common.AnyNamed;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.skriptlang.skript.lang.converter.Converters;
 
 /**
@@ -13,7 +13,7 @@ import org.skriptlang.skript.lang.converter.Converters;
  * @param world The world {@code region} is within.
  * @param region WorldGuard region.
  */
-public record WorldGuardRegion(World world, ProtectedRegion region) implements AnyContains<Object> {
+public record WorldGuardRegion(World world, ProtectedRegion region) implements AnyNamed, AnyContains<Object> {
 
 	@Override
 	public boolean equals(Object other) {
@@ -29,13 +29,22 @@ public record WorldGuardRegion(World world, ProtectedRegion region) implements A
 	}
 
 	/*
+	 * AnyNamed
+	 */
+
+	@Override
+	public String name() {
+		return region.getId();
+	}
+
+	/*
 	 * AnyContains
 	 */
 
 	@Override
 	public boolean contains(Object object) {
 		Location location = Converters.convert(object, Location.class);
-		return location != null && region().contains(BukkitAdapter.asBlockVector(location));
+		return location != null && region.contains(BukkitAdapter.asBlockVector(location));
 	}
 
 	@Override

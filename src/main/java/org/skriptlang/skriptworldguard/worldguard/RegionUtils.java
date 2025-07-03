@@ -5,6 +5,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.AbstractRegion;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
+import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
@@ -20,7 +21,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -83,16 +83,10 @@ public class RegionUtils {
 	 * @param location The location to test at
 	 * @return Whether the given player can build at the location.
 	 */
-	public static boolean canBuild(Player player, @NotNull Location location) {
-		World world = location.getWorld();
-		if (world == null) {
-			return false;
-		} else if (player.hasPermission("worldguard.region.bypass." + world.getName())) {
-			// Build access is always granted with this permission
-			// See https://worldguard.enginehub.org/en/latest/permissions/
-			return true;
-		}
-		return getRegionContainer().createQuery().testBuild(BukkitAdapter.adapt(location), WorldGuardPlugin.inst().wrapPlayer(player));
+	public static boolean canBuild(Player player, Location location) {
+		LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+		return WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(localPlayer, localPlayer.getWorld()) ||
+				getRegionContainer().createQuery().testBuild(BukkitAdapter.adapt(location), localPlayer);
 	}
 
 	/**
@@ -102,12 +96,15 @@ public class RegionUtils {
 	 * @return Whether the given player can build in all the regions.
 	 */
 	public static boolean canBuild(Player player, WorldGuardRegion... regions) {
+		LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+		if (WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(localPlayer, localPlayer.getWorld())) {
+			return true;
+		}
 		// create queryable set of regions
-		ApplicableRegionSet regionSet = new RegionResultSet(
-                (List<ProtectedRegion>) Arrays.stream(regions)
-                        .map(WorldGuardRegion::region)
-                        .collect(Collectors.toCollection(ArrayList::new)), null);
-		return regionSet.testState(WorldGuardPlugin.inst().wrapPlayer(player), Flags.BUILD);
+		ApplicableRegionSet regionSet = new RegionResultSet((List<ProtectedRegion>) Arrays.stream(regions)
+				.map(WorldGuardRegion::region)
+				.collect(Collectors.toCollection(ArrayList::new)), null);
+		return regionSet.testState(localPlayer, Flags.BUILD);
 	}
 
 	public static Iterator<Block> getRegionBlockIterator(Iterator<WorldGuardRegion> regionsIterator) {
