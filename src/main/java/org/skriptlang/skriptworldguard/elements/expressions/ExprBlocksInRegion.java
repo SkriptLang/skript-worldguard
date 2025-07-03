@@ -9,6 +9,7 @@ import ch.njol.skript.expressions.base.PropertyExpression;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
+import com.google.common.collect.Iterators;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
@@ -16,9 +17,7 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 @Name("Blocks of Region")
 @Description("An expression that returns all of the blocks in the given regions.")
@@ -40,20 +39,13 @@ public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Blo
 
 	@Override
 	protected Block[] get(Event event, WorldGuardRegion [] regions) {
-		return getBlocks(regions).toArray(new Block[0]);
+		return Iterators.toArray(iterator(event), Block.class);
 	}
 
 	@Override
 	public Iterator<? extends Block> iterator(Event event) {
-		return getBlocks(getExpr().getArray(event)).iterator();
-	}
-
-	private List<Block> getBlocks(WorldGuardRegion[] regions) {
-		List<Block> blocks = new ArrayList<>();
-		for (WorldGuardRegion region : regions) {
-			blocks.addAll(RegionUtils.getBlocksInRegion(region));
-		}
-		return blocks;
+		//noinspection unchecked
+		return RegionUtils.getRegionBlockIterator((Iterator<WorldGuardRegion>) getExpr().iterator(event));
 	}
 
 	@Override

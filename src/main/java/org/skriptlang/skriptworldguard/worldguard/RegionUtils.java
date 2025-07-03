@@ -1,8 +1,9 @@
 package org.skriptlang.skriptworldguard.worldguard;
 
-import ch.njol.skript.util.AABB;
+import com.google.common.collect.Iterators;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.AbstractRegion;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -19,13 +20,13 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,12 +44,12 @@ public class RegionUtils {
 			return null;
 		}
 
-		RegionManager rm = getRegionManager(world);
-		if (rm == null) {
+		RegionManager regionManager = getRegionManager(world);
+		if (regionManager == null) {
 			return null;
 		}
 
-		ProtectedRegion region = rm.getRegion(id);
+		ProtectedRegion region = regionManager.getRegion(id);
 		if (region == null) {
 			return null;
 		}
@@ -64,12 +65,12 @@ public class RegionUtils {
 			return regions;
 		}
 
-		RegionManager rm = getRegionManager(world);
-		if (rm == null) {
+		RegionManager regionManager = getRegionManager(world);
+		if (regionManager == null) {
 			return regions;
 		}
 
-		for (ProtectedRegion region : rm.getApplicableRegions(BukkitAdapter.asBlockVector(location))) {
+		for (ProtectedRegion region : regionManager.getApplicableRegions(BukkitAdapter.asBlockVector(location))) {
 			regions.add(new WorldGuardRegion(world, region));
 		}
 
@@ -109,32 +110,47 @@ public class RegionUtils {
 		return regionSet.testState(WorldGuardPlugin.inst().wrapPlayer(player), Flags.BUILD);
 	}
 
-	// TODO method returning iterator for efficiency
-	public static List<Block> getBlocksInRegion(WorldGuardRegion region) {
-		ProtectedRegion protectedRegion = region.region();
-		List<Block> blocks = new ArrayList<>();
-		if (protectedRegion instanceof ProtectedPolygonalRegion) { // Not as simple as a cube...
-			ProtectedPolygonalRegion polygonalRegion = (ProtectedPolygonalRegion) protectedRegion;
-			World world = region.world();
-			int min = polygonalRegion.getMinimumPoint().getBlockY();
-			int max = polygonalRegion.getMaximumPoint().getBlockY();
-			Polygonal2DRegion worldEditRegion = new Polygonal2DRegion(BukkitAdapter.adapt(world), polygonalRegion.getPoints(), min, max);
-			for (BlockVector3 block : worldEditRegion) {
-				blocks.add(world.getBlockAt(block.getBlockX(), block.getBlockY(), block.getBlockZ()));
+	public static Iterator<Block> getRegionBlockIterator(Iterator<WorldGuardRegion> regionsIterator) {
+		return new Iterator<>() {
+			Iterator<Block> currentBlockIterator = nextIterator();
+
+			private Iterator<Block> nextIterator() {
+				if (!regionsIterator.hasNext()) { // no new blocks, reuse empty iterator
+					return currentBlockIterator;
+				}
+				WorldGuardRegion region = regionsIterator.next();
+				World world = region.world();
+				ProtectedRegion protectedRegion = region.region();
+				AbstractRegion adaptedRegion;
+				if (protectedRegion instanceof ProtectedPolygonalRegion polygonalRegion) { // Not as simple as a cube...
+					adaptedRegion = new Polygonal2DRegion(BukkitAdapter.adapt(world), polygonalRegion.getPoints(),
+							polygonalRegion.getMinimumPoint().getY(), polygonalRegion.getMaximumPoint().getY());
+				} else if (protectedRegion instanceof ProtectedCuboidRegion) {
+					adaptedRegion = new CuboidRegion(BukkitAdapter.adapt(region.world()),
+							protectedRegion.getMinimumPoint(), protectedRegion.getMaximumPoint());
+				} else {
+					throw new IllegalArgumentException("Unexpected region type: " + protectedRegion.getClass());
+				}
+				return Iterators.transform(adaptedRegion.iterator(),
+						blockVector -> world.getBlockAt(blockVector.getX(), blockVector.getY(), blockVector.getZ()));
 			}
-		} else if (protectedRegion instanceof ProtectedCuboidRegion) {
-			BlockVector3 min = protectedRegion.getMinimumPoint();
-			BlockVector3 max = protectedRegion.getMaximumPoint();
-			AABB aabb = new AABB(
-					region.world(),
-					new Vector(min.getBlockX(), min.getBlockY(), min.getBlockZ()),
-					new Vector(max.getBlockX(), max.getBlockY(), max.getBlockZ())
-			);
-			for (Block block : aabb) {
-				blocks.add(block);
+
+			@Override
+			public boolean hasNext() {
+				if (!currentBlockIterator.hasNext()) {
+					currentBlockIterator = nextIterator();
+				}
+				return currentBlockIterator.hasNext();
 			}
-		}
-		return blocks;
+
+			@Override
+			public Block next() {
+				if (!currentBlockIterator.hasNext()) {
+					currentBlockIterator = nextIterator();
+				}
+				return currentBlockIterator.next();
+			}
+		};
 	}
 
 	/**
