@@ -1,7 +1,7 @@
 package org.skriptlang.skriptworldguard.elements.expressions;
 
 import ch.njol.skript.doc.Description;
-import ch.njol.skript.doc.Examples;
+import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
@@ -10,7 +10,6 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.util.Direction;
 import ch.njol.util.Kleenean;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -24,15 +23,16 @@ import java.util.List;
 
 @Name("Regions At")
 @Description("An expression that returns the regions at the given locations")
-@Examples({
-	"on click on a sign:",
-	"\tline 1 of the clicked block is \"[region info]\"",
-	"\tset {_regions::*} to regions at the clicked block",
-	"\tif {_regions::*} is empty:",
-	"\t\tmessage \"No regions exist at this sign.\"",
-	"\telse:",
-	"\t\tmessage \"Regions at this sign: <gold>%{_regions::*}%<reset>.\""
-})
+@Example("""
+	on right click:
+		the clicked block is tagged with minecraft tag "all_signs"
+		line 1 of the clicked block is "[Region Info]"
+		set {_regions::*} to the regions at the clicked block
+		if {_regions::*} is not set:
+			message "No regions exist at this sign."
+		else:
+			message "You are in: %{_regions::*}%."
+	""")
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
@@ -47,17 +47,14 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 	private Expression<Location> locations;
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
-		locations = Direction.combine(
-				(Expression<? extends Direction>) exprs[0],
-				(Expression<? extends Location>) exprs[1]
-		);
+	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+		//noinspection unchecked
+		locations = Direction.combine((Expression<? extends Direction>) exprs[0], (Expression<? extends Location>) exprs[1]);
 		return true;
 	}
 
 	@Override
-	protected WorldGuardRegion @NotNull [] get(@NotNull Event event) {
+	protected WorldGuardRegion[] get(Event event) {
 		Location[] locations = this.locations.getArray(event);
 		if (locations.length == 0) {
 			return new WorldGuardRegion[0];
@@ -75,12 +72,12 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	public @NotNull Class<? extends WorldGuardRegion> getReturnType() {
+	public Class<? extends WorldGuardRegion> getReturnType() {
 		return WorldGuardRegion.class;
 	}
 
 	@Override
-	public @NotNull String toString(@Nullable Event event, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
 		return "the regions " + locations.toString(event, debug);
 	}
 

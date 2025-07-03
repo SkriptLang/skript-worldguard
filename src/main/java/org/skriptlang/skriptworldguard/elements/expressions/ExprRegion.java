@@ -1,24 +1,25 @@
 package org.skriptlang.skriptworldguard.elements.expressions;
 
 import ch.njol.skript.doc.Description;
-import ch.njol.skript.doc.Examples;
+import ch.njol.skript.doc.Events;
+import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.EventValueExpression;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.event.Event;
 
-@Name("WorldGuard Region")
-@Description("The WorldGuard region in any WorldGuard region related event.")
-@Examples({
-	"on region enter:",
-		"\tsend \"You entered %region%\""
-})
+@Name("Region")
+@Description("The region in any region related event.")
+@Example("""
+	on region enter:
+		send "You have entered %region%"
+	""")
 @RequiredPlugins("WorldGuard 7")
+@Events("Region Enter/Leave")
 @Since("1.0")
 public class ExprRegion extends EventValueExpression<WorldGuardRegion> {
 
@@ -31,7 +32,7 @@ public class ExprRegion extends EventValueExpression<WorldGuardRegion> {
 	}
 
 	@Override
-	public @NotNull String toString(@Nullable Event event, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
 		return "the worldguard region";
 	}
 

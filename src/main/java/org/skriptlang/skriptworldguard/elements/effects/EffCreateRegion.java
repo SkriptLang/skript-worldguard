@@ -1,23 +1,22 @@
 package org.skriptlang.skriptworldguard.elements.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
-import ch.njol.skript.doc.Examples;
+import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
+import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.util.Kleenean;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector2;
-import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -32,20 +31,19 @@ import java.util.List;
 @Name("Create Region")
 @Description({
 	"An effect to create a WorldGuard region.",
-	"A temporary region is a region that will not be saved (only stored in memory).",
+	"A temporary region is a region that will not be saved, meaning it is lost when the server restarts.",
 	"A global region is a region that has no boundaries, meaning it covers the entire world.",
-	"A cuboid region is the traditional WorldGuard region most are used to creating. It has two points to determine the boundaries.",
-	"A polygonal region is a region that has been extended vertically, meaning that a minimum Y and a maximum Y are needed to create it.",
-	"At least three points must be provided to create a polygonal region.",
+	"A cuboid region is the traditional WorldGuard region. It has two points to determine the boundaries.",
+	"A polygonal region comprises many points. These points are used to draw a two-dimensional shape." +
+			" Then, with the provided heights, the shape is extended vertically to form the region." +
+			" At least three points must be provided to create a polygonal region.",
 	"NOTE: If you do not specify the world for a region, you must be sure that the locations provided all have the SAME world.",
 	"NOTE: Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, or forward slashes.",
 	"NOTE: If you attempt to create a region in a world where a region with the same id already exists, that region will be replaced."
 })
-@Examples({
-	"create a temporary global region named \"temporary_global_region\" in the player's world",
-	"create region \"cuboid_region\" in player's world between the location (0, 60, 0) and the location (10, 70, 10)",
-	"create a polygonal region named \"polygonal_region\" with a minimum height of 10 and a maximum height of 20 with points {points::*}"
-})
+@Example("create a temporary global region named \"temporary_global_region\" in the player's world")
+@Example("create region \"cuboid_region\" in player's world between the location (0, 60, 0) and the location (10, 70, 10)")
+@Example("create a polygonal region named \"polygonal_region\" with a minimum height of 10 and a maximum height of 20 with points {points::*}")
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class EffCreateRegion extends Effect {
@@ -62,24 +60,18 @@ public class EffCreateRegion extends Effect {
 	// Shared Values
 	private boolean temporary;
 	private Expression<String> id;
-	@Nullable
-	private Expression<World> world;
+	private @Nullable Expression<World> world;
 	// Cuboid Region Values
-	@Nullable
-	private Expression<Location> firstCorner;
-	@Nullable
-	private Expression<Location> secondCorner;
+	private @Nullable Expression<Location> firstCorner;
+	private @Nullable Expression<Location> secondCorner;
 	// Polygonal Region Values
-	@Nullable
-	private Expression<Number> minY;
-	@Nullable
-	private Expression<Number> maxY;
-	@Nullable
-	private Expression<Location> points;
+	private @Nullable Expression<Number> minY;
+	private @Nullable Expression<Number> maxY;
+	private @Nullable Expression<Location> points;
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
+	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
 		temporary = parseResult.hasTag("temporary");
 		id = (Expression<String>) exprs[0];
 		world = (Expression<World>) exprs[1];
@@ -95,12 +87,13 @@ public class EffCreateRegion extends Effect {
 	}
 
 	@Override
-	protected void execute(@NotNull Event event) {
+	protected void execute(Event event) {
 		String id = this.id.getSingle(event);
-		World world = this.world != null ? this.world.getSingle(event) : null; // May be null, but that is not necessarily a bad thing
 		if (id == null || !ProtectedRegion.isValidId(id)) {
 			return;
 		}
+
+		World world = this.world != null ? this.world.getSingle(event) : null; // May be null, but that is not necessarily a bad thing
 
 		ProtectedRegion region; // The new region we are going to create
 
@@ -122,15 +115,14 @@ public class EffCreateRegion extends Effect {
 				world = firstCornerWorld;
 			}
 
-			BlockVector3 firstBlockVector = BlockVector3.at(firstCorner.getBlockX(), firstCorner.getBlockY(), firstCorner.getBlockZ());
-			BlockVector3 secondBlockVector = BlockVector3.at(secondCorner.getBlockX(), secondCorner.getBlockY(), secondCorner.getBlockZ());
-			region = new ProtectedCuboidRegion(id, temporary, firstBlockVector, secondBlockVector);
+			region = new ProtectedCuboidRegion(id, temporary,
+					BukkitAdapter.asBlockVector(firstCorner),BukkitAdapter.asBlockVector(secondCorner));
 		} else if (minY != null) { // Polygonal Region
-			Number minY;
-			Number maxY;
-			Location[] points; // At least 3 points are needed
 			assert this.maxY != null && this.points != null;
-			if ((minY = this.minY.getSingle(event)) == null || (maxY = this.maxY.getSingle(event)) == null || (points = this.points.getArray(event)).length < 3) {
+			Number minY = this.minY.getSingle(event);
+			Number maxY = this.maxY.getSingle(event);
+			Location[] points = this.points.getArray(event);
+			if (minY == null || maxY == null || points.length < 3) {
 				return;
 			}
 
@@ -157,31 +149,38 @@ public class EffCreateRegion extends Effect {
 			region = new GlobalProtectedRegion(id, temporary);
 		}
 
-		RegionManager rm = RegionUtils.getRegionManager(world);
-		if (rm != null) {
-			rm.addRegion(region);
+		RegionManager regionManager = RegionUtils.getRegionManager(world);
+		if (regionManager != null) {
+			regionManager.addRegion(region);
 		}
 	}
 
 	@Override
-	public @NotNull String toString(@Nullable Event event, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
+		SyntaxStringBuilder builder = new SyntaxStringBuilder(event, debug);
+		builder.append("create a new");
+		if (temporary) {
+			builder.append("temporary");
+		}
 		if (firstCorner != null) { // Cuboid region
 			assert secondCorner != null;
-			return "create a new " + (temporary ? "temporary " : "") + "cuboid region named " + id.toString(event, debug)
-					+ (world == null ? " " : " in the world " + world.toString(event, debug))
-					+ "between " + firstCorner.toString(event, debug) + " and " + secondCorner.toString(event, debug);
+			builder.append("cuboid region named", id);
+			if (world != null) {
+				builder.append("in", world);
+			}
+			builder.append("between", firstCorner, "and", secondCorner);
 		} else if (minY != null) { // Polygonal region
 			assert maxY != null && points != null;
-			return "create a new " + (temporary ? "temporary " : "") + "polygonal region named " + id.toString(event, debug)
-					+ (world == null ? " " : " in the world " + world.toString(event, debug))
-					+ " with a minimum height of " + minY.toString(event, debug)
-					+ " and a maximum height of " + maxY.toString(event, debug)
-					+ " with the points " + points.toString(event, debug);
+			builder.append("polygonal region named", id);
+			if (world != null) {
+				builder.append("in", world);
+			}
+			builder.append("with a minimum height of", minY, "and a maximum height of", maxY, "with the points", points);
 		} else { // Global region
 			assert world != null;
-			return "create a new " + (temporary ? "temporary " : "") + "global region named " + id.toString(event, debug)
-					+ " in the world " + world.toString(event, debug);
+			builder.append("global region named", id, "in", world);
 		}
+		return builder.toString();
 	}
 
 }

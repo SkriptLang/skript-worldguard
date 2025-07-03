@@ -3,18 +3,17 @@ package org.skriptlang.skriptworldguard.elements.conditions;
 import ch.njol.skript.conditions.base.PropertyCondition;
 import ch.njol.skript.conditions.base.PropertyCondition.PropertyType;
 import ch.njol.skript.doc.Description;
-import ch.njol.skript.doc.Examples;
+import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
+import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
-import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import org.jetbrains.annotations.NotNull;
+import com.sk89q.worldguard.domains.DefaultDomain;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -23,17 +22,18 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
 
 @Name("Is Member/Owner of Region")
-@Description("A condition that tests whether the given players or groups are a member or owner of the given regions.")
-@Examples({
-	"on region enter:",
-		"\tplayer is the owner of the region",
-		"\tmessage \"Welcome back to %region%!\"",
-		"\tsend \"%player% just entered %region%!\" to the members of the region"
-})
+@Description("A condition to test whether a player/group is a member/owner of a region.")
+@Example("""
+	on region enter:
+		player is the owner of the region
+		message "Welcome back to %region%"
+		message "%player's name% just entered %region%" to the members of the region
+	""")
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class CondIsMemberOwner extends Condition {
 
+	// TODO 'direct' flag for whether or not to consider parent regions?
 	public static void register(SyntaxRegistry registry) {
 		registry.register(SyntaxRegistry.CONDITION, SyntaxInfo.builder(CondIsMemberOwner.class)
 				.supplier(CondIsMemberOwner::new)
@@ -45,49 +45,71 @@ public class CondIsMemberOwner extends Condition {
 
 	private Expression<Object> users;
 	private Expression<WorldGuardRegion> regions;
-	private boolean owner;
+	private boolean isOwner;
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public boolean init(Expression<?>[] exprs, int matchedPattern, @NotNull Kleenean isDelayed, @NotNull ParseResult parseResult) {
+	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+		//noinspection unchecked
 		users = (Expression<Object>) exprs[0];
+		//noinspection unchecked
 		regions = (Expression<WorldGuardRegion>) exprs[1];
-		owner = parseResult.hasTag("owner");
+		isOwner = parseResult.hasTag("owner");
 		setNegated(matchedPattern == 1);
 		return true;
 	}
 
 	@Override
-	public boolean check(@NotNull Event event) {
+	public boolean check(Event event) {
 		WorldGuardRegion[] regions = this.regions.getAll(event);
-		return users.check(event, user -> {
-			if (user instanceof OfflinePlayer) {
-				LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapOfflinePlayer((OfflinePlayer) user);
-				return SimpleExpression.check(
-						regions,
-						region -> owner ? region.getRegion().isOwner(localPlayer) : region.getRegion().isMember(localPlayer),
-						false,
-						this.regions.getAnd()
-				);
-			} else { // It's a String (group)
-				String group = (String) user;
-				return SimpleExpression.check(
-						regions,
-						region -> (owner ? region.getRegion().getOwners() : region.getRegion().getMembers()).getGroups().contains(group),
-						false,
-						this.regions.getAnd()
-				);
-			}
-		}, isNegated());
+		return users.check(event, user -> SimpleExpression.check(regions,
+				region -> check(region, isOwner, user), false, this.regions.getAnd()), isNegated());
+	}
+
+	private static boolean check(WorldGuardRegion region, boolean owner, Object object) {
+		DefaultDomain domain;
+		if (owner) {
+			domain = region.region().getOwners();
+		} else {
+			domain = region.region().getMembers();
+		}
+		if (object instanceof OfflinePlayer player) {
+			return domain.contains(player.getUniqueId());
+		} else if (object instanceof String group) {
+			return domain.getGroups().contains(group);
+		} else {
+			throw new IllegalArgumentException("object must be OfflinePlayer or String");
+		}
 	}
 
 	@Override
-	public @NotNull String toString(@Nullable Event event, boolean debug) {
+	public String toString(@Nullable Event event, boolean debug) {
+		SyntaxStringBuilder builder = new SyntaxStringBuilder(event, debug);
 		boolean isSingle = users.isSingle();
-		return users.toString(event, debug) + " " + (isSingle ? "is" : "are")
-				+ (isNegated() ? " not" : "")
-				+ " the " + (owner ? "owner" : "member") + (isSingle ? "" : "s")
-				+ " of " + regions.toString(event, debug);
+		builder.append(users);
+		if (isSingle) {
+			builder.append("is");
+		} else {
+			builder.append("are");
+		}
+		if (isNegated()) {
+			builder.append("not");
+		}
+		builder.append("the");
+		if (isOwner) {
+			if (isSingle) {
+				builder.append("owner");
+			} else {
+				builder.append("owners");
+			}
+		} else {
+			if (isSingle) {
+				builder.append("member");
+			} else {
+				builder.append("members");
+			}
+		}
+		builder.append("of", regions);
+		return builder.toString();
 	}
 
 }

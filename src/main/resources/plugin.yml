@@ -1,5 +1,5 @@
 main: org.skriptlang.skriptworldguard.SkriptWorldGuard
-api-version: 1.13
+api-version: 1.19
 name: skript-worldguard
 authors: ['SkriptLang Team', Contributors]
 description: Official WorldGuard 7 Addon for Skript

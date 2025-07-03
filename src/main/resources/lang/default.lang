@@ -1,13 +1,13 @@
 worldguard move types:
-    respawn: respawn
-    embark: embark
-    move: move
-    glide: glide
-    swim: swim
-    teleport: teleport
-    ride: ride
+    respawn: respawn, respawning
+    embark: embark, embarking
+    move: move, moving
+    glide: glide, gliding
+    swim: swim, swimming
+    teleport: teleport, teleporting, teleportation
+    ride: ride, riding
     other_non_cancellable: non cancellable, not cancellable
     other_cancellable: cancellable
 types:
     worldguardregion: worldguard region¦s
-    worldguardmovetype: worldguard move type¦s
+    worldguardmovetype: worldguard movement type¦s

@@ -104,18 +104,18 @@ public class RegionUtils {
 		// create queryable set of regions
 		ApplicableRegionSet regionSet = new RegionResultSet(
                 (List<ProtectedRegion>) Arrays.stream(regions)
-                        .map(WorldGuardRegion::getRegion)
+                        .map(WorldGuardRegion::region)
                         .collect(Collectors.toCollection(ArrayList::new)), null);
 		return regionSet.testState(WorldGuardPlugin.inst().wrapPlayer(player), Flags.BUILD);
 	}
 
-
+	// TODO method returning iterator for efficiency
 	public static List<Block> getBlocksInRegion(WorldGuardRegion region) {
-		ProtectedRegion protectedRegion = region.getRegion();
+		ProtectedRegion protectedRegion = region.region();
 		List<Block> blocks = new ArrayList<>();
 		if (protectedRegion instanceof ProtectedPolygonalRegion) { // Not as simple as a cube...
 			ProtectedPolygonalRegion polygonalRegion = (ProtectedPolygonalRegion) protectedRegion;
-			World world = region.getWorld();
+			World world = region.world();
 			int min = polygonalRegion.getMinimumPoint().getBlockY();
 			int max = polygonalRegion.getMaximumPoint().getBlockY();
 			Polygonal2DRegion worldEditRegion = new Polygonal2DRegion(BukkitAdapter.adapt(world), polygonalRegion.getPoints(), min, max);
@@ -126,7 +126,7 @@ public class RegionUtils {
 			BlockVector3 min = protectedRegion.getMinimumPoint();
 			BlockVector3 max = protectedRegion.getMaximumPoint();
 			AABB aabb = new AABB(
-					region.getWorld(),
+					region.world(),
 					new Vector(min.getBlockX(), min.getBlockY(), min.getBlockZ()),
 					new Vector(max.getBlockX(), max.getBlockY(), max.getBlockZ())
 			);
@@ -160,9 +160,11 @@ public class RegionUtils {
 	 * A helper method to simplify getting the RegionManager for a world.
 	 * @param world The world to get the RegionManager for.
 	 * @return The RegionManager for the given world, or null if:
-	 * - region data for the given world has not been loaded
-	 * - region data for the given world has failed to load
-	 * - support for regions has been disabled
+	 * <ul>
+	 *     <li>Region data for the given world has not been loaded</li>
+	 *     <li>Region data for the given world has failed to load</li>
+	 *     <li>Support for regions has been disabled</li>
+	 * </ul>
 	 */
 	@Nullable
 	public static RegionManager getRegionManager(World world) {

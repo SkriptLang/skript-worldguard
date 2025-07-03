@@ -133,8 +133,8 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 					@Override
 					public @NotNull Fields serialize(WorldGuardRegion region) {
 						Fields fields = new Fields();
-						fields.putObject("world", region.getWorld());
-						fields.putObject("id", region.getRegion().getId());
+						fields.putObject("world", region.world());
+						fields.putObject("id", region.region().getId());
 						return fields;
 					}
 
@@ -169,7 +169,7 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 				}));
 
 		Classes.registerClass(new EnumClassInfo<>(MoveType.class, "worldguardmovetype", "worldguard move types")
-				.user("worldguard ?move ?types?")
+				.user("worldguard ?move(ment)? ?types?")
 				.name("WorldGuard Move Type")
 				.description("The move type in a WorldGuard enter/leave event.")
 				.requiredPlugins("WorldGuard 7")

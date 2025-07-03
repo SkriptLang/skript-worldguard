@@ -3,29 +3,17 @@ package org.skriptlang.skriptworldguard.worldguard;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.World;
 
-public class WorldGuardRegion {
-
-	private final World world;
-	private final ProtectedRegion region;
-
-	public WorldGuardRegion(World world, ProtectedRegion region) {
-		this.world = world;
-		this.region = region;
-	}
-
-	public World getWorld() {
-		return world;
-	}
-
-	public ProtectedRegion getRegion() {
-		return region;
-	}
+/**
+ * A utility record for associating a {@link ProtectedRegion} with a {@link World}.
+ * @param world The world {@code region} is within.
+ * @param region WorldGuard region.
+ */
+public record WorldGuardRegion(World world, ProtectedRegion region) {
 
 	@Override
-	public boolean equals(Object o) {
-		if (o instanceof WorldGuardRegion) {
-			WorldGuardRegion other = (WorldGuardRegion) o;
-			return other.getRegion().getId().equals(region.getId()) && other.getWorld() == world;
+	public boolean equals(Object other) {
+		if (other instanceof WorldGuardRegion otherRegion) {
+			return otherRegion.world() == world && otherRegion.region().getId().equals(region.getId());
 		}
 		return false;
 	}
