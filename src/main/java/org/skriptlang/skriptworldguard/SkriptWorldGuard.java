@@ -129,7 +129,7 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 						}
 						WorldGuardRegion region = RegionUtils.getRegion(world, id);
 						if (region == null) {
-							throw new StreamCorruptedException("The " + RegionUtils.toString(world, id) + " from WorldGuard could not be found. Does it still exist?");
+							throw new StreamCorruptedException("The " + WorldGuardRegion.toString(world, id) + " from WorldGuard could not be found. Does it still exist?");
 						}
 						return region;
 					}

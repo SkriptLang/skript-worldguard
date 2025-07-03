@@ -30,7 +30,34 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RegionUtils {
+/**
+ * Utility methods for working with {@link WorldGuardRegion}s.
+ */
+public final class RegionUtils {
+
+	private RegionUtils() { }
+
+	/**
+	 * A helper method to simplify getting the RegionContainer from WorldGuard.
+	 * @return The RegionContainer from the {@link WorldGuardPlatform}.
+	 */
+	public static RegionContainer getRegionContainer() {
+		return WorldGuard.getInstance().getPlatform().getRegionContainer();
+	}
+
+	/**
+	 * A helper method to simplify getting the RegionManager for a world.
+	 * @param world The world to get the RegionManager for.
+	 * @return The RegionManager for the given world, or null if:
+	 * <ul>
+	 *     <li>Region data for the given world has not been loaded</li>
+	 *     <li>Region data for the given world has failed to load</li>
+	 *     <li>Support for regions has been disabled</li>
+	 * </ul>
+	 */
+	public static @Nullable RegionManager getRegionManager(World world) {
+		return getRegionContainer().get(BukkitAdapter.adapt(world));
+	}
 
 	/**
 	 * A helper method to simplify getting a region in a world.
@@ -155,40 +182,6 @@ public class RegionUtils {
 				return currentBlockIterator.next();
 			}
 		};
-	}
-
-	/**
-	 * A helper method to provide a standardized way to stringify a {@link ProtectedRegion}.
-	 * @param world The world of a region.
-	 * @param id The ID of a region.
-	 * @return A stringified version of a region.
-	 * @see WorldGuardRegion#toString()
-	 */
-	public static String toString(World world, String id) {
-		return "region \"" + id + "\" in the world \"" + world.getName() + "\"";
-	}
-
-	/**
-	 * A helper method to simplify getting the RegionContainer from WorldGuard.
-	 * @return The RegionContainer from the {@link WorldGuardPlatform}.
-	 */
-	public static RegionContainer getRegionContainer() {
-		return WorldGuard.getInstance().getPlatform().getRegionContainer();
-	}
-
-	/**
-	 * A helper method to simplify getting the RegionManager for a world.
-	 * @param world The world to get the RegionManager for.
-	 * @return The RegionManager for the given world, or null if:
-	 * <ul>
-	 *     <li>Region data for the given world has not been loaded</li>
-	 *     <li>Region data for the given world has failed to load</li>
-	 *     <li>Support for regions has been disabled</li>
-	 * </ul>
-	 */
-	@Nullable
-	public static RegionManager getRegionManager(World world) {
-		return WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world));
 	}
 
 }

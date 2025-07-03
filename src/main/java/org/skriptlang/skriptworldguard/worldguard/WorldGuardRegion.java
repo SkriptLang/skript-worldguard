@@ -6,6 +6,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.jetbrains.annotations.NotNull;
 import org.skriptlang.skript.lang.converter.Converters;
 
 /**
@@ -13,7 +14,19 @@ import org.skriptlang.skript.lang.converter.Converters;
  * @param world The world {@code region} is within.
  * @param region WorldGuard region.
  */
-public record WorldGuardRegion(World world, ProtectedRegion region) implements AnyNamed, AnyContains<Object> {
+public record WorldGuardRegion(World world, ProtectedRegion region)
+		implements Comparable<WorldGuardRegion>, AnyNamed, AnyContains<Object> {
+
+	/**
+	 * A helper method to provide a standardized way to stringify a {@link WorldGuardRegion} from its components.
+	 * @param world The world of a region.
+	 * @param id The ID of a region.
+	 * @return A stringified version of a region.
+	 * @see WorldGuardRegion#toString()
+	 */
+	public static String toString(World world, String id) {
+		return "region \"" + id + "\" in the world \"" + world.getName() + "\"";
+	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -25,7 +38,16 @@ public record WorldGuardRegion(World world, ProtectedRegion region) implements A
 
 	@Override
 	public String toString() {
-		return RegionUtils.toString(world, region.getId());
+		return toString(world, region.getId());
+	}
+
+	/*
+	 * Comparable
+	 */
+
+	@Override
+	public int compareTo(@NotNull WorldGuardRegion other) {
+		return Integer.compare(this.region.getPriority(), other.region.getPriority());
 	}
 
 	/*

@@ -63,6 +63,7 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 		for (Location location : locations) {
 			regions.addAll(RegionUtils.getRegionsAt(location));
 		}
+		regions.sort(WorldGuardRegion::compareTo);
 		return regions.toArray(new WorldGuardRegion[0]);
 	}
 
