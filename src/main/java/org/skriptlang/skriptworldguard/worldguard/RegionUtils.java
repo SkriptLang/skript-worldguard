@@ -84,8 +84,12 @@ public class RegionUtils {
 	 * @return Whether the given player can build at the location.
 	 */
 	public static boolean canBuild(Player player, Location location) {
+		World world = location.getWorld();
+		if (world == null) {
+			return false;
+		}
 		LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-		return WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(localPlayer, localPlayer.getWorld()) ||
+		return WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(localPlayer, BukkitAdapter.adapt(world)) ||
 				getRegionContainer().createQuery().testBuild(BukkitAdapter.adapt(location), localPlayer);
 	}
 
@@ -97,8 +101,11 @@ public class RegionUtils {
 	 */
 	public static boolean canBuild(Player player, WorldGuardRegion... regions) {
 		LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-		if (WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(localPlayer, localPlayer.getWorld())) {
-			return true;
+		// check bypass
+		for (WorldGuardRegion region : regions) {
+			if (WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(localPlayer, BukkitAdapter.adapt(region.world()))) {
+				return true;
+			}
 		}
 		// create queryable set of regions
 		ApplicableRegionSet regionSet = new RegionResultSet((List<ProtectedRegion>) Arrays.stream(regions)
