@@ -14,6 +14,7 @@ import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Bukkit;
@@ -26,9 +27,9 @@ import java.util.UUID;
 
 @Name("Members/Owners of Region")
 @Description({
-	"An expression that returns the members of owners of the given regions.",
-	"The members or owners of a region are not limited to players, so a keyword to get the group members or owners exists.",
-	"By default though, the player members or owners of a group will be returned."
+	"An expression to obtain the members/owners of the given regions.",
+	"The members/owners of a region are not limited to players, so a keyword to get the group members or owners exists.",
+	"Note that, by default, the player members/owners of a group will be returned."
 })
 @Example("""
 	on region enter:
@@ -39,9 +40,11 @@ import java.util.UUID;
 public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion, Object> {
 
 	public static void register(SyntaxRegistry registry) {
-		// TODO consider alternative pattern: player members/owners, member/owner groups
-		register(registry, ExprRegionMembersOwners.class, Object.class,
-				"[player|:group] (members|:owners)", "worldguardregions");
+		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegionMembersOwners.class, Object.class)
+				.priority(DEFAULT_PRIORITY)
+				.addPatterns(getDefaultPatterns("player (members|:owners)", "worldguardregions"))
+				.addPatterns(getDefaultPatterns("(member|:owner) groups", "worldguardregions"))
+				.build());
 	}
 
 	private boolean isGroups;
@@ -192,14 +195,19 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 		SyntaxStringBuilder builder = new SyntaxStringBuilder(event, debug);
 		builder.append("the");
 		if (isGroups) {
-			builder.append("group");
+			if (isOwners) {
+				builder.append("owner");
+			} else {
+				builder.append("member");
+			}
+			builder.append("groups");
 		} else {
 			builder.append("player");
-		}
-		if (isOwners) {
-			builder.append("owners");
-		} else {
-			builder.append("members");
+			if (isOwners) {
+				builder.append("owners");
+			} else {
+				builder.append("members");
+			}
 		}
 		builder.append("of", getExpr());
 		return builder.toString();
