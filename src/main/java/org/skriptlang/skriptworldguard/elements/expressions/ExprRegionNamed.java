@@ -34,8 +34,8 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 	public static void register(SyntaxRegistry registry) {
 		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegionNamed.class, WorldGuardRegion.class)
 				.supplier(ExprRegionNamed::new)
-				.addPatterns("[the] [worldguard] region[s] [named] %strings% [in %world%]",
-						"[the] [worldguard] region[s] with [the] (name[s]|id[s]) %strings% [in %world%]")
+				.addPatterns("[the] [worldguard] region[s] [named] %strings% [(in|of) %world%]",
+						"[the] [worldguard] region[s] with [the] (name[s]|id[s]) %strings% [(in|of) %world%]")
 				.build());
 	}
 

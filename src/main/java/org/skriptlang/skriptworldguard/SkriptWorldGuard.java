@@ -16,12 +16,9 @@ import ch.njol.skript.util.Version;
 import ch.njol.yggdrasil.Fields;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.session.MoveType;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.addon.SkriptAddon;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -32,8 +29,6 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
 import java.io.StreamCorruptedException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 
@@ -96,42 +91,24 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 				.requiredPlugins("WorldGuard 7")
 				.since("1.0")
 				.parser(new Parser<>() {
-					// TODO maybe we should do something else here... perhaps make use of SkriptParser methods?
-					final Pattern regionPattern = Pattern.compile(
-							"(?:the )?(?:worldguard )?region (?:with (?:the )?(?:name|id) |named )?\"(.+)\" (?:in|of) (?:(?:the )?world )?\"(.+)\""
-					);
-
 					@Override
-					public @Nullable WorldGuardRegion parse(@NotNull String input, @NotNull ParseContext context) {
-						if (context == ParseContext.EVENT || context == ParseContext.COMMAND) {
-							Matcher matcher = regionPattern.matcher(input);
-							if (matcher.matches()) {
-								String id = matcher.group(1);
-								World world = Bukkit.getWorld(matcher.group(2));
-								return world == null ? null : RegionUtils.getRegion(world, id);
-							}
-						}
-						return null;
+					public boolean canParse(ParseContext context) {
+						return false;
 					}
 
 					@Override
-					public boolean canParse(@NotNull ParseContext context) {
-						return context == ParseContext.EVENT || context == ParseContext.COMMAND;
-					}
-
-					@Override
-					public @NotNull String toString(WorldGuardRegion region, int flags) {
+					public String toString(WorldGuardRegion region, int flags) {
 						return region.toString();
 					}
 
 					@Override
-					public @NotNull String toVariableNameString(WorldGuardRegion region) {
+					public String toVariableNameString(WorldGuardRegion region) {
 						return "worldguardregion:" + region;
 					}
 				})
 				.serializer(new Serializer<>() {
 					@Override
-					public @NotNull Fields serialize(WorldGuardRegion region) {
+					public Fields serialize(WorldGuardRegion region) {
 						Fields fields = new Fields();
 						fields.putObject("world", region.world());
 						fields.putObject("id", region.region().getId());
@@ -139,12 +116,12 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 					}
 
 					@Override
-					public void deserialize(WorldGuardRegion region, @NotNull Fields fields) {
+					public void deserialize(WorldGuardRegion region, Fields fields) {
 						assert false;
 					}
 
 					@Override
-					protected WorldGuardRegion deserialize(@NotNull Fields fields) throws StreamCorruptedException {
+					protected WorldGuardRegion deserialize(Fields fields) throws StreamCorruptedException {
 						World world = fields.getObject("world", World.class);
 						String id = fields.getObject("id", String.class);
 						if (world == null || id == null) {
