@@ -11,7 +11,6 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.util.Kleenean;
-import ch.njol.util.coll.CollectionUtils;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.registration.SyntaxInfo;
@@ -25,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Name("Members/Owners of Region")
+@Name("Region Members/Owners")
 @Description({
 	"An expression to obtain the members/owners of the given regions.",
 	"The members/owners of a region are not limited to players, so a keyword to get the group members or owners exists.",

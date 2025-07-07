@@ -21,7 +21,7 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
 
-@Name("Is Member/Owner of Region")
+@Name("Is Region Member/Owner")
 @Description("A condition to test whether a player/group is a member/owner of a region.")
 @Example("""
 	on region enter:
