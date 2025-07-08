@@ -1,7 +1,7 @@
 package org.skriptlang.skriptworldguard.worldguard;
 
 import ch.njol.skript.bukkitutil.EntityUtils;
-import ch.njol.skript.entity.EntityType;
+import ch.njol.skript.entity.EntityData;
 import ch.njol.skript.util.Date;
 import ch.njol.skript.util.WeatherType;
 import com.google.common.collect.ImmutableMap;
@@ -112,6 +112,7 @@ public record WorldGuardFlag<F, T>(Flag<T> flag, FlagValueConverter<F, T> valueC
 				to -> new Vector(to.getX(), to.getY(), to.getZ())));
 
 		// Additional mappings
+		// no WorldGuard GameMode -> Bukkit GameMode adapter...
 		converters.put(com.sk89q.worldedit.world.gamemode.GameMode.class,
 				new FlagValueConverter<>(GameMode.class, com.sk89q.worldedit.world.gamemode.GameMode.class,
 						BukkitAdapter::adapt, to -> GameMode.valueOf(to.getName().toUpperCase(Locale.ENGLISH))));
@@ -133,9 +134,9 @@ public record WorldGuardFlag<F, T>(Flag<T> flag, FlagValueConverter<F, T> valueC
 							}
 						}));
 		converters.put(com.sk89q.worldedit.world.entity.EntityType.class,
-				new FlagValueConverter<>(EntityType.class, com.sk89q.worldedit.world.entity.EntityType.class,
-						from -> BukkitAdapter.adapt(EntityUtils.toBukkitEntityType(from.data)),
-						to -> new EntityType(EntityUtils.toSkriptEntityData(BukkitAdapter.adapt(to)), 1)));
+				new FlagValueConverter<>(EntityData.class, com.sk89q.worldedit.world.entity.EntityType.class,
+						from -> BukkitAdapter.adapt(EntityUtils.toBukkitEntityType(from)),
+						to -> EntityUtils.toSkriptEntityData(BukkitAdapter.adapt(to))));
 
 		FLAG_CLASS_MAPPINGS = mappings.build();
 		FLAG_VALUE_CONVERTERS = converters.build();
