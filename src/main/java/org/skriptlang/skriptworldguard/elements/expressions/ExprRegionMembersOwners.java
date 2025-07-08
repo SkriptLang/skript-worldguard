@@ -4,7 +4,6 @@ import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.PropertyExpression;
 import ch.njol.skript.lang.Expression;
@@ -34,15 +33,14 @@ import java.util.UUID;
 	on region enter:
 		message "You have entered %region%. It is owned by %owners of region%."
 	""")
-@RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion, Object> {
 
 	public static void register(SyntaxRegistry registry) {
 		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegionMembersOwners.class, Object.class)
 				.priority(DEFAULT_PRIORITY)
-				.addPatterns(getDefaultPatterns("player (members|:owners)", "worldguardregions"))
-				.addPatterns(getDefaultPatterns("(member|:owner) groups", "worldguardregions"))
+				.addPatterns(getPatterns("player (members|:owners)", "worldguardregions"))
+				.addPatterns(getPatterns("(member|:owner) groups", "worldguardregions"))
 				.build());
 	}
 
@@ -59,7 +57,7 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 	}
 
 	@Override
-	protected Object [] get(Event event, WorldGuardRegion [] regions) {
+	protected Object[] get(Event event, WorldGuardRegion[] regions) {
 		List<DefaultDomain> domains = new ArrayList<>();
 		if (isOwners) {
 			for (WorldGuardRegion region : regions) {

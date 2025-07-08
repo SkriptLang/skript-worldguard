@@ -39,15 +39,15 @@ public final class RegionUtils {
 	private RegionUtils() { }
 
 	/**
-	 * A helper method to simplify getting the RegionContainer from WorldGuard.
-	 * @return The RegionContainer from the {@link WorldGuardPlatform}.
+	 * A utility method for obtaining the {@link RegionContainer} from the running {@link WorldGuardPlatform}.
+	 * @return The region container of the active platform.
 	 */
 	public static RegionContainer getRegionContainer() {
 		return WorldGuard.getInstance().getPlatform().getRegionContainer();
 	}
 
 	/**
-	 * A helper method to simplify getting the RegionManager for a world.
+	 * A utility method for obtaining a world's {@link RegionManager}.
 	 * @param world The world to get the RegionManager for.
 	 * @return The RegionManager for the given world, or null if:
 	 * <ul>
@@ -61,7 +61,7 @@ public final class RegionUtils {
 	}
 
 	/**
-	 * A helper method to simplify getting the regions of a world.
+	 * A utility method for obtaining all of the regions in a world.
 	 * @param world The world to obtain regions of.
 	 * @return The regions of {@code world}.
 	 *  If {@link #getRegionManager(World)} is unavailable, this method returns an empty list.
@@ -78,7 +78,7 @@ public final class RegionUtils {
 	}
 
 	/**
-	 * A helper method to simplify getting a region in a world.
+	 * A utility method for obtaining a named region in a world.
 	 * @param world The world of the region.
 	 * @param id The ID of the region. This method will perform ID validation.
 	 * @return The region with the given id in the given world, or null if the region does not exist
@@ -102,23 +102,26 @@ public final class RegionUtils {
 		return new WorldGuardRegion(world, region);
 	}
 
+	/**
+	 * A utility method for obtaining the regions at a specific location.
+	 * @param location The location to search for regions at.
+	 * @return A list of all regions found at {@code location}.
+	 */
 	public static Collection<WorldGuardRegion> getRegionsAt(Location location) {
-		List<WorldGuardRegion> regions = new ArrayList<>();
-
 		World world = location.getWorld();
 		if (world == null) {
-			return regions;
+			return List.of();
 		}
 
 		RegionManager regionManager = getRegionManager(world);
 		if (regionManager == null) {
-			return regions;
+			return List.of();
 		}
 
+		List<WorldGuardRegion> regions = new ArrayList<>();
 		for (ProtectedRegion region : regionManager.getApplicableRegions(BukkitAdapter.asBlockVector(location))) {
 			regions.add(new WorldGuardRegion(world, region));
 		}
-
 		return regions;
 	}
 
@@ -159,15 +162,20 @@ public final class RegionUtils {
 		return regionSet.testState(localPlayer, Flags.BUILD);
 	}
 
-	public static Iterator<Block> getRegionBlockIterator(Iterator<WorldGuardRegion> regionsIterator) {
+	/**
+	 * A utility method for obtaining an iterator over the blocks of multiple regions.
+	 * @param regionIterator An iterator over the regions whose blocks should be iterated over.
+	 * @return An iterator over the blocks of the regions of {@code regionsIterator}.
+	 */
+	public static Iterator<Block> getRegionBlockIterator(Iterator<WorldGuardRegion> regionIterator) {
 		return new Iterator<>() {
 			Iterator<Block> currentBlockIterator = nextIterator();
 
 			private Iterator<Block> nextIterator() {
-				if (!regionsIterator.hasNext()) { // no new blocks, reuse empty iterator
+				if (!regionIterator.hasNext()) { // no new blocks, reuse empty iterator
 					return currentBlockIterator;
 				}
-				WorldGuardRegion region = regionsIterator.next();
+				WorldGuardRegion region = regionIterator.next();
 				World world = region.world();
 				ProtectedRegion protectedRegion = region.region();
 				AbstractRegion adaptedRegion;

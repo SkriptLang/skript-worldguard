@@ -5,7 +5,6 @@ import ch.njol.skript.conditions.base.PropertyCondition.PropertyType;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Expression;
@@ -29,7 +28,6 @@ import org.bukkit.event.Event;
 		message "Welcome back to %region%"
 		message "%player's name% just entered %region%" to the members of the region
 	""")
-@RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class CondIsRegionMemberOwner extends Condition {
 

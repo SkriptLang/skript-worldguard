@@ -4,7 +4,6 @@ import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Events;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.EventValueExpression;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +17,6 @@ import org.bukkit.event.Event;
 	on region enter:
 		send "You have entered %region%"
 	""")
-@RequiredPlugins("WorldGuard 7")
 @Events("Region Enter/Leave")
 @Since("1.0")
 public class ExprRegion extends EventValueExpression<WorldGuardRegion> {

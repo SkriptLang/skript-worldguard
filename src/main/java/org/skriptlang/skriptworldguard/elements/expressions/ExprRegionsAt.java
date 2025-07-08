@@ -3,7 +3,6 @@ package org.skriptlang.skriptworldguard.elements.expressions;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
@@ -22,7 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Name("Regions At")
-@Description("An expression that returns the regions at the given locations")
+@Description({
+	"An expression to obtain the regions at a specific location.",
+	"Note that the regions will be returned in ascending order by priority."
+})
 @Example("""
 	on right click:
 		the clicked block is tagged with minecraft tag "all_signs"
@@ -33,7 +35,6 @@ import java.util.List;
 		else:
 			message "You are in: %{_regions::*}%."
 	""")
-@RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 

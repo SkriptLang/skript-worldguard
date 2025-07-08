@@ -5,7 +5,6 @@ import ch.njol.skript.conditions.base.PropertyCondition.PropertyType;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Expression;
@@ -34,15 +33,16 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 			else:
 				set the targeted block to the first argument
 	""")
-@RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class CondCanBuildInRegions extends Condition {
 
 	public static void register(SyntaxRegistry registry) {
 		registry.register(SyntaxRegistry.CONDITION, SyntaxInfo.builder(CondCanBuildInRegions.class)
 				.supplier(CondCanBuildInRegions::new)
-				.addPatterns(PropertyCondition.getPatterns(PropertyType.BE, "allowed to build (%-directions% %-locations%|[in] %-worldguardregions%)", "players"))
-				.addPatterns(PropertyCondition.getPatterns(PropertyType.CAN, "build (%-directions% %-locations%|[in] %-worldguardregions%)", "players"))
+				.addPatterns(PropertyCondition.getPatterns(PropertyType.BE,
+						"allowed to build (%-directions% %-locations%|[in] %-worldguardregions%)", "players"))
+				.addPatterns(PropertyCondition.getPatterns(PropertyType.CAN,
+						"build (%-directions% %-locations%|[in] %-worldguardregions%)", "players"))
 				.build());
 	}
 

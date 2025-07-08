@@ -35,16 +35,15 @@ import java.util.List;
 	"A global region is a region that has no boundaries, meaning it covers the entire world.",
 	"A cuboid region is the traditional WorldGuard region. It has two points to determine the boundaries.",
 	"A polygonal region comprises many points. These points are used to draw a two-dimensional shape." +
-			" Then, with the provided heights, the shape is extended vertically to form the region." +
-			" At least three points must be provided to create a polygonal region.",
-	"NOTE: If you do not specify the world for a region, you must be sure that the locations provided all have the SAME world.",
-	"NOTE: Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, or forward slashes.",
-	"NOTE: If you attempt to create a region in a world where a region with the same id already exists, that region will be replaced."
+		" Then, with the provided heights, the shape is extended vertically to form the region." +
+		" At least three points must be provided to create a polygonal region.",
+	"Note that if you do not specify the world for a region, you must be sure that the locations provided all have the same world.",
+	"Note that Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, or forward slashes.",
+	"Note that if you attempt to create a region in a world where a region with the same ID already exists, that region will be replaced."
 })
 @Example("create a temporary global region named \"temporary_global_region\" in the player's world")
 @Example("create region \"cuboid_region\" in player's world between the location (0, 60, 0) and the location (10, 70, 10)")
 @Example("create a polygonal region named \"polygonal_region\" with a minimum height of 10 and a maximum height of 20 with points {points::*}")
-@RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class EffCreateRegion extends Effect {
 

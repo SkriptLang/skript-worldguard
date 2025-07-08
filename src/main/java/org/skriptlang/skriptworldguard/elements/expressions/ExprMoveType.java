@@ -4,7 +4,6 @@ import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Events;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.EventValueExpression;
 import com.sk89q.worldguard.session.MoveType;
@@ -19,7 +18,6 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 		if the movement type is swimming:
 			message "You have swum into %region%!"
 	""")
-@RequiredPlugins("WorldGuard 7")
 @Events("Region Enter/Leave")
 @Since("1.0")
 public class ExprMoveType extends EventValueExpression<MoveType> {

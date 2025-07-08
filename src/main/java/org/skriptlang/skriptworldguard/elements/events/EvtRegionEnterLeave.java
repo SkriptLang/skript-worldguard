@@ -32,12 +32,11 @@ public class EvtRegionEnterLeave extends SkriptEvent implements SyntaxRuntimeErr
 						"enter[ing] of " + regionPattern,
 						"region (exit[ing]|leav(e|ing))",
 						"exit[ing] of " + regionPattern)
-				.addDescription("Called when a player enters or leaves a region (or the specified region(s))")
+				.addDescription("Called when a player enters or leaves a region.")
 				.addExample("""
 						on region enter:
 							send "You entered %region%"
 						""")
-				.addRequiredPlugin("WorldGuard 7")
 				.addSince("1.0")
 				.build());
 		EventValues.registerEventValue(RegionEnterLeaveEvent.class, WorldGuardRegion.class, RegionEnterLeaveEvent::getRegion);

@@ -4,7 +4,6 @@ import ch.njol.skript.conditions.base.PropertyCondition;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -20,7 +19,6 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 			message "<red>'%text-argument%' is not a valid region ID")
 		# here is where the rest of the command would go :)
 	""")
-@RequiredPlugins("WorldGuard 7")
 @Since("1.0")
 public class CondIsValidRegionId extends PropertyCondition<String> {
 
