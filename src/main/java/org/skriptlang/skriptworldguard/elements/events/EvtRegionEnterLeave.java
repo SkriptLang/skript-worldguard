@@ -10,7 +10,6 @@ import ch.njol.skript.registrations.EventValues;
 import com.sk89q.worldguard.session.MoveType;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.registration.BukkitRegistryKeys;
@@ -31,7 +30,7 @@ public class EvtRegionEnterLeave extends SkriptEvent implements SyntaxRuntimeErr
 				.addPatterns("region enter[ing]",
 						"enter[ing] of " + regionPattern,
 						"region (exit[ing]|leav(e|ing))",
-						"exit[ing] of " + regionPattern)
+						"(exit[ing]|leav(e|ing)) of " + regionPattern)
 				.addDescription("Called when a player enters or leaves a region.")
 				.addExample("""
 						on region enter:
@@ -40,7 +39,6 @@ public class EvtRegionEnterLeave extends SkriptEvent implements SyntaxRuntimeErr
 				.addSince("1.0")
 				.build());
 		EventValues.registerEventValue(RegionEnterLeaveEvent.class, WorldGuardRegion.class, RegionEnterLeaveEvent::getRegion);
-		EventValues.registerEventValue(RegionEnterLeaveEvent.class, Player.class, RegionEnterLeaveEvent::getPlayer);
 		EventValues.registerEventValue(RegionEnterLeaveEvent.class, MoveType.class, RegionEnterLeaveEvent::getMoveType);
 	}
 

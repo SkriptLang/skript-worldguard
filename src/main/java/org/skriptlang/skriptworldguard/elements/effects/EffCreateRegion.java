@@ -3,7 +3,6 @@ package org.skriptlang.skriptworldguard.elements.effects;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
@@ -38,7 +37,7 @@ import java.util.List;
 		" Then, with the provided heights, the shape is extended vertically to form the region." +
 		" At least three points must be provided to create a polygonal region.",
 	"Note that if you do not specify the world for a region, you must be sure that the locations provided all have the same world.",
-	"Note that Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, or forward slashes.",
+	"Note that Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, and forward slashes.",
 	"Note that if you attempt to create a region in a world where a region with the same ID already exists, that region will be replaced."
 })
 @Example("create a temporary global region named \"temporary_global_region\" in the player's world")
@@ -88,7 +87,12 @@ public class EffCreateRegion extends Effect {
 	@Override
 	protected void execute(Event event) {
 		String id = this.id.getSingle(event);
-		if (id == null || !ProtectedRegion.isValidId(id)) {
+		if (id == null) {
+			return;
+		}
+		if (!ProtectedRegion.isValidId(id)) {
+			error("'" + id + "' is an invalid region ID. Region IDs can only contain" +
+					" letters, numbers, underscores, commas, single quotation marks, dashes, pluses, and forward slashes");
 			return;
 		}
 
@@ -109,6 +113,8 @@ public class EffCreateRegion extends Effect {
 				World secondCornerWorld = secondCorner.getWorld();
 				// We want the locations to have matching worlds
 				if (firstCornerWorld == null || firstCornerWorld != secondCornerWorld) {
+					error("A world to create the region in was not specified,"
+							+ " but the provided corner points have different worlds");
 					return;
 				}
 				world = firstCornerWorld;
@@ -121,7 +127,11 @@ public class EffCreateRegion extends Effect {
 			Number minY = this.minY.getSingle(event);
 			Number maxY = this.maxY.getSingle(event);
 			Location[] points = this.points.getArray(event);
-			if (minY == null || maxY == null || points.length < 3) {
+			if (minY == null || maxY == null || points.length == 0) {
+				return;
+			}
+			if (points.length < 3) {
+				error("A polygonal region needs at least 3 points, but only " + points.length + " points were provided");
 				return;
 			}
 
@@ -130,6 +140,10 @@ public class EffCreateRegion extends Effect {
 				for (Location point : points) { // We want the locations to have matching worlds
 					World pointWorld = point.getWorld();
 					if (pointWorld == null || pointWorld != world) {
+						if (this.world == null) { // only error if the user didn't specify a world
+							error("A world to create the region in was not specified,"
+									+ " but the provided points have different worlds");
+						}
 						return;
 					}
 				}
