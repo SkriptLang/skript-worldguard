@@ -22,6 +22,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,6 +58,23 @@ public final class RegionUtils {
 	 */
 	public static @Nullable RegionManager getRegionManager(World world) {
 		return getRegionContainer().get(BukkitAdapter.adapt(world));
+	}
+
+	/**
+	 * A helper method to simplify getting the regions of a world.
+	 * @param world The world to obtain regions of.
+	 * @return The regions of {@code world}.
+	 *  If {@link #getRegionManager(World)} is unavailable, this method returns an empty list.
+	 */
+	public static @Unmodifiable List<WorldGuardRegion> getRegions(World world) {
+		RegionManager regionManager = getRegionManager(world);
+		if (regionManager == null) {
+			return List.of();
+		}
+
+		return regionManager.getRegions().values().stream()
+				.map(region -> new WorldGuardRegion(world, region))
+				.toList();
 	}
 
 	/**

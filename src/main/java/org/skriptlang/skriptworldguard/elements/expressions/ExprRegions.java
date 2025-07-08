@@ -3,13 +3,13 @@ package org.skriptlang.skriptworldguard.elements.expressions;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.RequiredPlugins;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -23,55 +23,69 @@ import java.util.List;
 
 @Name("Regions")
 @Description({
-	"An expression that obtains a region from an ID and world.",
-	"Please note that region IDs are case insensitive."
+	"An expression to obtain the regions of all worlds, a specific world, or the region with a specific name in a world.",
+	"Please note that region names (IDs) are case insensitive."
 })
 @Example("the region \"region\" in world(\"world\"")
-@RequiredPlugins("WorldGuard 7")
+@Example("all of the regions in the player's world")
 @Since("1.0")
-public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
+public class ExprRegions extends SimpleExpression<WorldGuardRegion> {
 
 	public static void register(SyntaxRegistry registry) {
-		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegionNamed.class, WorldGuardRegion.class)
-				.supplier(ExprRegionNamed::new)
+		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegions.class, WorldGuardRegion.class)
+				.supplier(ExprRegions::new)
 				.addPatterns("[the] [worldguard] region[s] [named] %strings% [(in|of) %world%]",
-						"[the] [worldguard] region[s] with [the] (name[s]|id[s]) %strings% [(in|of) %world%]")
+						"[the] [worldguard] region[s] with [the] (name[s]|id[s]) %strings% [(in|of) %world%]",
+						"[all [[of] the]|the] [worldguard] regions [(in|of) %-worlds%]")
 				.build());
 	}
 
-	private Expression<String> ids;
-	private Expression<World> world;
+	private @Nullable Expression<String> ids;
+	private @Nullable Expression<World> worlds;
 
 	@Override
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+		if (exprs.length == 2) {
+			//noinspection unchecked
+			ids = (Expression<String>) exprs[0];
+		}
 		//noinspection unchecked
-		ids = (Expression<String>) exprs[0];
-		//noinspection unchecked
-		world = (Expression<World>) exprs[1];
+		worlds = (Expression<World>) exprs[exprs.length - 1];
 		return true;
 	}
 
 	@Override
 	protected WorldGuardRegion [] get(Event event) {
-		World world = this.world.getSingle(event);
-		if (world == null) {
-			return new WorldGuardRegion[0];
-		}
-
 		List<WorldGuardRegion> regions = new ArrayList<>();
-		for (String id : ids.getArray(event)) {
-			WorldGuardRegion region = RegionUtils.getRegion(world, id);
-			if (region != null) {
-				regions.add(region);
+		if (ids == null) {
+			World[] worlds;
+			if (this.worlds == null) {
+				worlds = Bukkit.getWorlds().toArray(new World[0]);
+			} else {
+				worlds = this.worlds.getArray(event);
+			}
+			for (World world : worlds) {
+				regions.addAll(RegionUtils.getRegions(world));
+			}
+		} else {
+			assert worlds != null;
+			World world = this.worlds.getSingle(event); // single for this pattern
+			if (world == null) {
+				return new WorldGuardRegion[0];
+			}
+			for (String id : ids.getArray(event)) {
+				WorldGuardRegion region = RegionUtils.getRegion(world, id);
+				if (region != null) {
+					regions.add(region);
+				}
 			}
 		}
-
 		return regions.toArray(new WorldGuardRegion[0]);
 	}
 
 	@Override
 	public boolean isSingle() {
-		return ids.isSingle();
+		return ids != null && ids.isSingle();
 	}
 
 	@Override
@@ -82,20 +96,25 @@ public class ExprRegionNamed extends SimpleExpression<WorldGuardRegion> {
 	@Override
 	public String toString(@Nullable Event event, boolean debug) {
 		SyntaxStringBuilder builder = new SyntaxStringBuilder(event, debug);
-		boolean isSingle = ids.isSingle();
+		boolean isSingle = isSingle();
 		builder.append("the");
 		if (isSingle) {
 			builder.append("region");
 		} else {
 			builder.append("regions");
 		}
-		builder.append("with the");
-		if (isSingle) {
-			builder.append("id");
-		} else {
-			builder.append("ids");
+		if (ids != null) {
+			builder.append("with the");
+			if (isSingle) {
+				builder.append("id");
+			} else {
+				builder.append("ids");
+			}
+			builder.append(ids);
 		}
-		builder.append(ids, "in", world);
+		if (worlds != null) {
+			builder.append("in", worlds);
+		}
 		return builder.toString();
 	}
 
