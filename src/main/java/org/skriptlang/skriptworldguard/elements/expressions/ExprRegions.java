@@ -23,7 +23,7 @@ import java.util.List;
 
 @Name("Regions")
 @Description({
-	"An expression to obtain the regions of all worlds, a specific world, or the region with a specific name in a world.",
+	"An expression to obtain all regions of a specific world or the region with a specific name in a world.",
 	"Please note that region names (IDs) are case insensitive."
 })
 @Example("the region \"region\" in world(\"world\"")
@@ -36,12 +36,12 @@ public class ExprRegions extends SimpleExpression<WorldGuardRegion> {
 				.supplier(ExprRegions::new)
 				.addPatterns("[the] [worldguard] region[s] [named] %strings% [(in|of) %world%]",
 						"[the] [worldguard] region[s] with [the] (name[s]|id[s]) %strings% [(in|of) %world%]",
-						"[all [[of] the]|the] [worldguard] regions [(in|of) %-worlds%]")
+						"[all [[of] the]|the] [worldguard] regions [(in|of) %worlds%]")
 				.build());
 	}
 
 	private @Nullable Expression<String> ids;
-	private @Nullable Expression<World> worlds;
+	private Expression<World> worlds;
 
 	@Override
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
@@ -58,13 +58,7 @@ public class ExprRegions extends SimpleExpression<WorldGuardRegion> {
 	protected WorldGuardRegion [] get(Event event) {
 		List<WorldGuardRegion> regions = new ArrayList<>();
 		if (ids == null) {
-			World[] worlds;
-			if (this.worlds == null) {
-				worlds = Bukkit.getWorlds().toArray(new World[0]);
-			} else {
-				worlds = this.worlds.getArray(event);
-			}
-			for (World world : worlds) {
+			for (World world : this.worlds.getArray(event)) {
 				regions.addAll(RegionUtils.getRegions(world));
 			}
 		} else {
@@ -112,9 +106,7 @@ public class ExprRegions extends SimpleExpression<WorldGuardRegion> {
 			}
 			builder.append(ids);
 		}
-		if (worlds != null) {
-			builder.append("in", worlds);
-		}
+		builder.append("in", worlds);
 		return builder.toString();
 	}
 
