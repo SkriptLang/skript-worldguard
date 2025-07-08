@@ -25,10 +25,10 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 		return {_regions::1}
 	""")
 @Since("1.0")
-public class ExprPriority extends SimplePropertyExpression<WorldGuardRegion, Integer> {
+public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegion, Integer> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, ExprPriority.class, Integer.class, "[region] priority", "worldguardregions");
+		register(registry, ExprRegionPriority.class, Integer.class, "[region] priority", "worldguardregions");
 	}
 
 	@Override

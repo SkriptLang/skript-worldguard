@@ -22,10 +22,10 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 	""")
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
-public class CondIsValidId extends PropertyCondition<String> {
+public class CondIsValidRegionId extends PropertyCondition<String> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, CondIsValidId.class, "[a] valid [worldguard] region id", "strings");
+		register(registry, CondIsValidRegionId.class, "[a] valid [worldguard] region id", "strings");
 	}
 
 	@Override

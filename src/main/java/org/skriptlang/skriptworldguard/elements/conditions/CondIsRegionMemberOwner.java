@@ -31,12 +31,12 @@ import org.bukkit.event.Event;
 	""")
 @RequiredPlugins("WorldGuard 7")
 @Since("1.0")
-public class CondIsMemberOwner extends Condition {
+public class CondIsRegionMemberOwner extends Condition {
 
 	// TODO 'direct' flag for whether or not to consider parent regions?
 	public static void register(SyntaxRegistry registry) {
-		registry.register(SyntaxRegistry.CONDITION, SyntaxInfo.builder(CondIsMemberOwner.class)
-				.supplier(CondIsMemberOwner::new)
+		registry.register(SyntaxRegistry.CONDITION, SyntaxInfo.builder(CondIsRegionMemberOwner.class)
+				.supplier(CondIsRegionMemberOwner::new)
 				.addPatterns(PropertyCondition.getPatterns(PropertyType.BE,
 						"([a] member|owner:[the|an] owner) of %worldguardregions%",
 						"offlineplayers/strings"))
