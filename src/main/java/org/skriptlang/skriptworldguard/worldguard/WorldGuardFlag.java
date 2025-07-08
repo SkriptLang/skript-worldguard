@@ -81,14 +81,11 @@ public record WorldGuardFlag<F, T>(Flag<T> flag, FlagValueConverter<F, T> valueC
 		// skipped: MapFlag (too complex), NumberFlag (is abstract)
 		// RegionGroupFlag
 		mappings.put(RegionGroupFlag.class, RegionGroup.class);
+		// We use the same parsing for group flags as is used by the command
+		// It is consistent across flags, just not static, so we use the BUILD flag instance
 		converters.put(RegionGroup.class, new FlagValueConverter<>(String.class, RegionGroup.class,
-				from -> {
-					try {
-						return RegionGroup.valueOf(from.toUpperCase(Locale.ENGLISH));
-					} catch (IllegalArgumentException e) {
-						return null;
-					}
-				}, to -> to.name().toLowerCase(Locale.ENGLISH)));
+				from -> Flags.BUILD.getRegionGroupFlag().detectValue(from),
+				to -> to.name().replace("_", "").toLowerCase(Locale.ENGLISH)));
 		// skipped: RegistryFlag (handled at runtime), SetFlag (handled at runtime)
 		// StateFlag
 		mappings.put(StateFlag.class, StateFlag.State.class);
@@ -215,6 +212,21 @@ public record WorldGuardFlag<F, T>(Flag<T> flag, FlagValueConverter<F, T> valueC
 
 		//noinspection unchecked, rawtypes
 		return new LookupResult(new WorldGuardFlag(flag, converter), null);
+	}
+
+	/**
+	 * Obtains the group flag of this flag, which controls who the flag is applied to.
+	 * @return The group flag of this flag. Null if this flag is already a group flag.
+	 * @see RegionGroupFlag
+	 */
+	public @Nullable WorldGuardFlag<String, RegionGroup> groupFlag() {
+		RegionGroupFlag groupFlag = flag().getRegionGroupFlag();
+		if (groupFlag == null) { // This must be a group flag
+			return null;
+		}
+		//noinspection unchecked
+		return new WorldGuardFlag<>(flag().getRegionGroupFlag(),
+				(FlagValueConverter<String, RegionGroup>) getFlagValueConverter(groupFlag));
 	}
 
 }

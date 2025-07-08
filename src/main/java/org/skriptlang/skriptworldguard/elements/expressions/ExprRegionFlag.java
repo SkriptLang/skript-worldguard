@@ -47,11 +47,12 @@ public class ExprRegionFlag extends SimpleExpression<Object> {
 
 	public static void register(SyntaxRegistry registry) {
 		PropertyExpression.register(registry, ExprRegionFlag.class, Object.class,
-				"[region] flag %string%", "worldguardregions");
+				"[region] [group:group flag of [the]] flag %string%", "worldguardregions");
 	}
 
 	private Expression<String> flagName;
 	private Expression<WorldGuardRegion> regions;
+	private boolean isGroupFlag;
 
 	private WorldGuardFlag<?, ?> flag;
 
@@ -62,6 +63,7 @@ public class ExprRegionFlag extends SimpleExpression<Object> {
 		flagName = (Expression<String>) expressions[isFlagFirst ? 0 : 1];
 		//noinspection unchecked
 		regions = (Expression<WorldGuardRegion>) expressions[isFlagFirst ? 1 : 0];
+		isGroupFlag = parseResult.hasTag("group");
 
 		if (flagName instanceof Literal<String> literal) {
 			WorldGuardFlag.LookupResult result = WorldGuardFlag.fromName(literal.getSingle());
@@ -70,25 +72,47 @@ public class ExprRegionFlag extends SimpleExpression<Object> {
 				Skript.error(result.error());
 				return false;
 			}
+			if (isGroupFlag) {
+				flag = flag.groupFlag();
+				if (flag == null) {
+					Skript.error("The flag '" + literal.getSingle() + "' does not have a group flag");
+					return false;
+				}
+			}
 		}
 
 		return true;
 	}
 
+	private @Nullable WorldGuardFlag<?, ?> getRuntimeFlag(Event event) {
+		if (flag != null) {
+			return flag;
+		}
+		String flagName = this.flagName.getSingle(event);
+		if (flagName == null) {
+			return null;
+		}
+		WorldGuardFlag.LookupResult result = WorldGuardFlag.fromName(flagName);
+		WorldGuardFlag<?, ?> flag = result.flag();
+		if (flag == null) {
+			error(result.error());
+			return null;
+		}
+		if (isGroupFlag) {
+			flag = flag.groupFlag();
+			if (flag == null) {
+				error("The flag '" + flagName + "' does not have a group flag");
+				return null;
+			}
+		}
+		return flag;
+	}
+
 	@Override
 	protected Object @Nullable [] get(Event event) {
-		WorldGuardFlag<?, ?> flag = this.flag;
+		WorldGuardFlag<?, ?> flag = getRuntimeFlag(event);
 		if (flag == null) {
-			String flagName = this.flagName.getSingle(event);
-			if (flagName == null) {
-				return new Object[0];
-			}
-			WorldGuardFlag.LookupResult result = WorldGuardFlag.fromName(flagName);
-			flag = result.flag();
-			if (flag == null) {
-				error(result.error());
-				return new Object[0];
-			}
+			return new Object[0];
 		}
 		WorldGuardRegion[] regions = this.regions.getArray(event);
 
@@ -127,18 +151,9 @@ public class ExprRegionFlag extends SimpleExpression<Object> {
 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
-		WorldGuardFlag<?, ?> flag = this.flag;
+		WorldGuardFlag<?, ?> flag = getRuntimeFlag(event);
 		if (flag == null) {
-			String flagName = this.flagName.getSingle(event);
-			if (flagName == null) {
-				return;
-			}
-			WorldGuardFlag.LookupResult result = WorldGuardFlag.fromName(flagName);
-			flag = result.flag();
-			if (flag == null) {
-				error(result.error());
-				return;
-			}
+			return;
 		}
 		WorldGuardRegion[] regions = this.regions.getArray(event);
 
@@ -206,9 +221,13 @@ public class ExprRegionFlag extends SimpleExpression<Object> {
 				} else {
 					value = delta[0];
 				}
-				for (WorldGuardRegion region : regions) {
-					//noinspection unchecked, rawtypes
-					region.region().setFlag((Flag) flag.flag(), ((Function) flag.valueConverter().toMapper()).apply(value));
+				//noinspection unchecked, rawtypes
+				Object mappedValue = ((Function) flag.valueConverter().toMapper()).apply(value);
+				if (mappedValue != null) {
+					for (WorldGuardRegion region : regions) {
+						//noinspection unchecked, rawtypes
+						region.region().setFlag((Flag) flag.flag(), mappedValue);
+					}
 				}
 			}
 			case ADD, REMOVE -> {
@@ -234,7 +253,11 @@ public class ExprRegionFlag extends SimpleExpression<Object> {
 						}
 
 						//noinspection unchecked, rawtypes
-						region.region().setFlag((Flag) flag.flag(), ((Function) flag.valueConverter().toMapper()).apply(result));
+						Object mappedResult = ((Function) flag.valueConverter().toMapper()).apply(result);
+						if (mappedResult != null) {
+							//noinspection unchecked, rawtypes
+							region.region().setFlag((Flag) flag.flag(), mappedResult);
+						}
 					}
 				} else if (flag.valueConverter().fromType().isArray()) {
 					Set<?> deltaSet = Set.of(delta);
@@ -262,10 +285,13 @@ public class ExprRegionFlag extends SimpleExpression<Object> {
 						} else {
 							valueSet = Sets.union(mappedSet, deltaSet);
 						}
-						Object[] values = valueSet.toArray();
 
 						//noinspection unchecked, rawtypes
-						region.region().setFlag((Flag) flag.flag(), ((Function) flag.valueConverter().toMapper()).apply(values));
+						Object mappedValue = ((Function) flag.valueConverter().toMapper()).apply(valueSet.toArray());
+						if (mappedValue != null) {
+							//noinspection unchecked, rawtypes
+							region.region().setFlag((Flag) flag.flag(), mappedValue);
+						}
 					}
 				} else {
 					error(toString(event, Skript.debug()) + " can't have values " +
@@ -306,9 +332,13 @@ public class ExprRegionFlag extends SimpleExpression<Object> {
 
 	@Override
 	public String toString(@Nullable Event event, boolean debug) {
-		return new SyntaxStringBuilder(event, debug)
-				.append("the flag", flagName, "of", regions)
-				.toString();
+		SyntaxStringBuilder builder = new SyntaxStringBuilder(event, debug);
+		builder.append("the");
+		if (isGroupFlag) {
+			builder.append("group flag of the");
+		}
+		builder.append("flag", flagName, "of", regions);
+		return builder.toString();
 	}
 
 }
