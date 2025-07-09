@@ -25,7 +25,10 @@ import java.util.Locale;
 public class CondIsRegionType extends PropertyCondition<WorldGuardRegion> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, CondIsRegionType.class, "[a] (:global|:cuboid[s]|:polygon[s|al]) [region[s]]", "worldguardregions");
+		registry.register(SyntaxRegistry.CONDITION, infoBuilder(CondIsRegionType.class, PropertyType.BE,
+				"[a] (:global|:cuboid[s]|:polygon[s|al]) [region[s]]", "worldguardregions")
+						.supplier(CondIsRegionType::new)
+						.build());
 	}
 
 	private RegionType regionType;

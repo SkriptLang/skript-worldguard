@@ -22,7 +22,10 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 public class CondIsRegionTemporary extends PropertyCondition<WorldGuardRegion> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, CondIsRegionTemporary.class, "(temporary|transient)", "worldguardregions");
+		registry.register(SyntaxRegistry.CONDITION, infoBuilder(CondIsRegionTemporary.class, PropertyType.BE,
+				"(temporary|transient)", "worldguardregions")
+						.supplier(CondIsRegionTemporary::new)
+						.build());
 	}
 
 	@Override

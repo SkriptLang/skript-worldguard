@@ -12,7 +12,6 @@ import ch.njol.util.Kleenean;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.event.Event;
@@ -36,8 +35,9 @@ import java.util.List;
 public class ExprRegionPoints extends PropertyExpression<WorldGuardRegion, Location> {
 
 	public static void register(SyntaxRegistry registry) {
-		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegionPoints.class, Location.class)
-				.priority(DEFAULT_PRIORITY)
+		registry.register(SyntaxRegistry.EXPRESSION, infoBuilder(ExprRegionPoints.class, Location.class, "", "", false)
+				.supplier(ExprRegionPoints::new)
+				.clearPatterns() // overwrite them
 				.addPatterns(getPatterns("(min|:max)[imum] point[s]", "worldguardregions"))
 				.addPatterns(getPatterns("points", "worldguardregions"))
 				.build());

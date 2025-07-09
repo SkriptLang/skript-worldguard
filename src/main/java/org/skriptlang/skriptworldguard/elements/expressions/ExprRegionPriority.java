@@ -28,7 +28,10 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 public class ExprRegionPriority extends SimplePropertyExpression<WorldGuardRegion, Integer> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, ExprRegionPriority.class, Integer.class, "[region] priority", "worldguardregions");
+		registry.register(SyntaxRegistry.EXPRESSION, infoBuilder(ExprRegionPriority.class, Integer.class,
+				"[region] priority", "worldguardregions", false)
+						.supplier(ExprRegionPriority::new)
+						.build());
 	}
 
 	@Override

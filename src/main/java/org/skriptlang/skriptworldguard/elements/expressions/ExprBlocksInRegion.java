@@ -27,7 +27,10 @@ import java.util.Iterator;
 public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Block> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, ExprBlocksInRegion.class, Block.class, "blocks", "worldguardregions");
+		registry.register(SyntaxRegistry.EXPRESSION, infoBuilder(ExprBlocksInRegion.class, Block.class,
+				"blocks", "worldguardregions", false)
+						.supplier(ExprBlocksInRegion::new)
+						.build());
 	}
 
 	@Override

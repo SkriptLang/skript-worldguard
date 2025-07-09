@@ -23,7 +23,10 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 public class CondIsValidRegionId extends PropertyCondition<String> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, CondIsValidRegionId.class, "[a] valid [worldguard] region id", "strings");
+		registry.register(SyntaxRegistry.CONDITION, infoBuilder(CondIsValidRegionId.class, PropertyType.BE,
+				"[a] valid [worldguard] region id", "strings")
+						.supplier(CondIsValidRegionId::new)
+						.build());
 	}
 
 	@Override

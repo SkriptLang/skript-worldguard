@@ -46,8 +46,10 @@ import java.util.function.Function;
 public class ExprRegionFlag extends SimpleExpression<Object> {
 
 	public static void register(SyntaxRegistry registry) {
-		PropertyExpression.register(registry, ExprRegionFlag.class, Object.class,
-				"[region] [group:group flag of [the]] flag %string%", "worldguardregions");
+		registry.register(SyntaxRegistry.EXPRESSION, PropertyExpression.infoBuilder(ExprRegionFlag.class, Object.class,
+				"[region] [group:group flag of [the]] flag %string%", "worldguardregions", false)
+						.supplier(ExprRegionFlag::new)
+						.build());
 	}
 
 	private Expression<String> flagName;

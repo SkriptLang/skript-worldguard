@@ -27,8 +27,10 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 public class ExprRegionParent extends SimplePropertyExpression<WorldGuardRegion, WorldGuardRegion> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, ExprRegionParent.class, WorldGuardRegion.class,
-				"[region] parent[s]", "worldguardregions");
+		registry.register(SyntaxRegistry.EXPRESSION, infoBuilder(ExprRegionParent.class, WorldGuardRegion.class,
+				"[region] parent[s]", "worldguardregions", false)
+						.supplier(ExprRegionParent::new)
+						.build());
 	}
 
 	@Override

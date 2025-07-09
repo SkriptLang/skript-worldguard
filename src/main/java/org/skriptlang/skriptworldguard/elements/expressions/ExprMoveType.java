@@ -23,7 +23,10 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 public class ExprMoveType extends EventValueExpression<MoveType> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, ExprMoveType.class, MoveType.class, "[worldguard] move[ment][ ]type");
+		registry.register(SyntaxRegistry.EXPRESSION, infoBuilder(ExprMoveType.class, MoveType.class,
+				"[worldguard] move[ment][ ]type")
+						.supplier(ExprMoveType::new)
+						.build());
 	}
 
 	public ExprMoveType() {

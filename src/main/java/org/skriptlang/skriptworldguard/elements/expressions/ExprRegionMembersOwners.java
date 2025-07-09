@@ -12,7 +12,6 @@ import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.util.Kleenean;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 import org.bukkit.Bukkit;
@@ -37,8 +36,9 @@ import java.util.UUID;
 public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion, Object> {
 
 	public static void register(SyntaxRegistry registry) {
-		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegionMembersOwners.class, Object.class)
-				.priority(DEFAULT_PRIORITY)
+		registry.register(SyntaxRegistry.EXPRESSION, infoBuilder(ExprRegionMembersOwners.class, Object.class, "", "", false)
+				.supplier(ExprRegionMembersOwners::new)
+				.clearPatterns() // overwrite them
 				.addPatterns(getPatterns("player (members|:owners)", "worldguardregions"))
 				.addPatterns(getPatterns("(member|:owner) groups", "worldguardregions"))
 				.build());

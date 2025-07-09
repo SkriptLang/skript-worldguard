@@ -22,7 +22,10 @@ import org.bukkit.event.Event;
 public class ExprRegion extends EventValueExpression<WorldGuardRegion> {
 
 	public static void register(SyntaxRegistry registry) {
-		register(registry, ExprRegion.class, WorldGuardRegion.class, "[worldguard] region");
+		registry.register(SyntaxRegistry.EXPRESSION, infoBuilder(ExprRegion.class, WorldGuardRegion.class,
+				"[worldguard] region")
+						.supplier(ExprRegion::new)
+						.build());
 	}
 
 	public ExprRegion() {
