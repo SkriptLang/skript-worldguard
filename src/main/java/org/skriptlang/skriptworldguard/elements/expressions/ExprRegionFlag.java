@@ -303,6 +303,11 @@ public class ExprRegionFlag extends SimpleExpression<Object> {
 			}
 			case DELETE, RESET -> {
 				for (WorldGuardRegion region : regions) {
+					// first, clear the flag's group flag if possible, then clear the flag itself
+					WorldGuardFlag<?, ?> groupFlag = flag.groupFlag();
+					if (groupFlag != null) {
+						region.region().setFlag(groupFlag.flag(), null);
+					}
 					region.region().setFlag(flag.flag(), null);
 				}
 			}
