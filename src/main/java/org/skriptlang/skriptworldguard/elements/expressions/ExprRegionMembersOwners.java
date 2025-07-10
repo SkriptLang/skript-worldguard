@@ -37,14 +37,14 @@ import java.util.UUID;
 	command /promote <text> <player>:
 		trigger:
 			set {_region} to the region text-argument in the player's world
-				if player-argument is an owner of {_region}:
-					message "<red>%player-argument% is already an owner of %{_region}%"
-				else if player-argument is a member of {_region}:
-					add player to the player owners of {_region}
-					message "<green>%player-argument% has been promoted to an owner of %{_region}%"
-				else:
-					add player to the player members of {_region}
-					message "<green>%player-argument% has been promoted to a member of %{_region}%"
+			if player-argument is an owner of {_region}:
+				message "<red>%player-argument% is already an owner of %{_region}%"
+			else if player-argument is a member of {_region}:
+				add player to the owners of {_region}
+				message "<green>%player-argument% has been promoted to an owner of %{_region}%"
+			else:
+				add player to the members of {_region}
+				message "<green>%player-argument% has been promoted to a member of %{_region}%"
 	""")
 @Since("1.0")
 public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion, Object> {
@@ -57,7 +57,7 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 						"[:player|:group] (members|:owners)",
 						"worldguardregions"))
 				.addPatterns(getPatterns(
-						"(member|:owner) [player:players|group:groups]",
+						"(member|:owner) (player:players|group:groups)",
 						"worldguardregions"))
 				.build());
 	}
