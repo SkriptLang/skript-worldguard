@@ -31,7 +31,7 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 			if the player cannot build at the targeted block:
 				message "<red>You do not have permission to modify your targeted block!"
 			else:
-				set the targeted block to the first argument
+				set the targeted block to the material-argument
 	""")
 @Since("1.0")
 public class CondCanBuildInRegions extends Condition {
@@ -61,7 +61,7 @@ public class CondCanBuildInRegions extends Condition {
 			//noinspection unchecked
 			regions = (Expression<WorldGuardRegion>) exprs[3];
 		}
-		setNegated(matchedPattern % 2 == 0);
+		setNegated(matchedPattern % 2 == 1);
 		return true;
 	}
 
