@@ -2,9 +2,6 @@ package org.skriptlang.skriptworldguard.worldguard;
 
 import com.google.common.collect.Iterators;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.regions.AbstractRegion;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.regions.Polygonal2DRegion;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -13,8 +10,6 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.RegionResultSet;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import org.bukkit.Location;
@@ -177,18 +172,7 @@ public final class RegionUtils {
 				}
 				WorldGuardRegion region = regionIterator.next();
 				World world = region.world();
-				ProtectedRegion protectedRegion = region.region();
-				AbstractRegion adaptedRegion;
-				if (protectedRegion instanceof ProtectedPolygonalRegion polygonalRegion) { // Not as simple as a cube...
-					adaptedRegion = new Polygonal2DRegion(BukkitAdapter.adapt(world), polygonalRegion.getPoints(),
-							polygonalRegion.getMinimumPoint().getY(), polygonalRegion.getMaximumPoint().getY());
-				} else if (protectedRegion instanceof ProtectedCuboidRegion) {
-					adaptedRegion = new CuboidRegion(BukkitAdapter.adapt(region.world()),
-							protectedRegion.getMinimumPoint(), protectedRegion.getMaximumPoint());
-				} else {
-					throw new IllegalArgumentException("Unexpected region type: " + protectedRegion.getClass());
-				}
-				return Iterators.transform(adaptedRegion.iterator(),
+				return Iterators.transform(region.asWorldEditRegion().iterator(),
 						blockVector -> world.getBlockAt(blockVector.getX(), blockVector.getY(), blockVector.getZ()));
 			}
 

@@ -3,7 +3,14 @@ package org.skriptlang.skriptworldguard.worldguard;
 import ch.njol.skript.lang.util.common.AnyContains;
 import ch.njol.skript.lang.util.common.AnyNamed;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Polygonal2DRegion;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
@@ -65,6 +72,10 @@ public record WorldGuardRegion(World world, ProtectedRegion region)
 
 	@Override
 	public boolean contains(Object object) {
+		if (object instanceof Chunk chunk) {
+			BlockVector2 chunkVector = BlockVector2.at(chunk.getX(), chunk.getZ());
+			return asWorldEditRegion().getChunks().contains(chunkVector);
+		}
 		Location location = Converters.convert(object, Location.class);
 		return location != null && region.contains(BukkitAdapter.asBlockVector(location));
 	}
@@ -72,6 +83,29 @@ public record WorldGuardRegion(World world, ProtectedRegion region)
 	@Override
 	public boolean isSafeToCheck(Object value) {
 		return value != null;
+	}
+
+	/*
+	 * Utility
+	 */
+
+	/**
+	 * Converts this region into a WorldEdit {@link Region}.
+	 * @return A region representing the physical area of this region.
+	 * @throws IllegalArgumentException If this region does not encompass a physical area ({@link ProtectedRegion#isPhysicalArea()}).
+	 */
+	public Region asWorldEditRegion() {
+		Region worldEditRegion;
+		if (region instanceof ProtectedPolygonalRegion polygonalRegion) { // Not as simple as a cube...
+			worldEditRegion = new Polygonal2DRegion(BukkitAdapter.adapt(world), polygonalRegion.getPoints(),
+					polygonalRegion.getMinimumPoint().getY(), polygonalRegion.getMaximumPoint().getY());
+		} else if (region instanceof ProtectedCuboidRegion) {
+			worldEditRegion = new CuboidRegion(BukkitAdapter.adapt(world),
+					region.getMinimumPoint(), region.getMaximumPoint());
+		} else {
+			throw new IllegalArgumentException("Unexpected region type: " + region.getClass());
+		}
+		return worldEditRegion;
 	}
 
 }
