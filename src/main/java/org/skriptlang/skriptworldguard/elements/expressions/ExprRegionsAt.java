@@ -79,6 +79,11 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 	}
 
 	@Override
+	public boolean isLoopOf(String input) {
+		return input.equalsIgnoreCase("region");
+	}
+
+	@Override
 	public String toString(@Nullable Event event, boolean debug) {
 		return "the regions " + locations.toString(event, debug);
 	}
