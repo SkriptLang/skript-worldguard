@@ -18,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -25,12 +26,25 @@ import java.util.UUID;
 @Name("Region Members/Owners")
 @Description({
 	"An expression to obtain the members/owners of the given regions.",
-	"The members/owners of a region are not limited to players, so a keyword to get the group members or owners exists.",
-	"Note that, by default, the player members/owners of a group will be returned."
+	"The members/owners of a region are made up of players and groups (strings).",
+	"By default, this expression returns both. However, keyword specifiers for each type (player/group) are available."
 })
 @Example("""
 	on region enter:
 		message "You have entered %region%. It is owned by %owners of region%."
+	""")
+@Example("""
+	command /promote <text> <player>:
+		trigger:
+			set {_region} to the region text-argument in the player's world
+				if player-argument is an owner of {_region}:
+					message "<red>%player-argument% is already an owner of %{_region}%"
+				else if player-argument is a member of {_region}:
+					add player to the player owners of {_region}
+					message "<green>%player-argument% has been promoted to an owner of %{_region}%"
+				else:
+					add player to the player members of {_region}
+					message "<green>%player-argument% has been promoted to a member of %{_region}%"
 	""")
 @Since("1.0")
 public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion, Object> {
@@ -39,18 +53,32 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 		registry.register(SyntaxRegistry.EXPRESSION, infoBuilder(ExprRegionMembersOwners.class, Object.class, "", "", false)
 				.supplier(ExprRegionMembersOwners::new)
 				.clearPatterns() // overwrite them
-				.addPatterns(getPatterns("player (members|:owners)", "worldguardregions"))
-				.addPatterns(getPatterns("(member|:owner) groups", "worldguardregions"))
+				.addPatterns(getPatterns(
+						"[:player|:group] (members|:owners)",
+						"worldguardregions"))
+				.addPatterns(getPatterns(
+						"(member|:owner) [player:players|group:groups]",
+						"worldguardregions"))
 				.build());
 	}
 
-	private boolean isGroups;
+	private enum Type {
+		PLAYER,
+		GROUP,
+		BOTH
+	}
+
 	private boolean isOwners;
+	private Type type = Type.BOTH;
 
 	@Override
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		isGroups = parseResult.hasTag("group");
 		isOwners = parseResult.hasTag("owners");
+		if (parseResult.hasTag("player")) {
+			type = Type.PLAYER;
+		} else if (parseResult.hasTag("group")) {
+			type = Type.GROUP;
+		}
 		//noinspection unchecked
 		setExpr((Expression<? extends WorldGuardRegion>) exprs[0]);
 		return true;
@@ -69,27 +97,32 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 			}
 		}
 
-		if (isGroups) {
-			List<String> groups = new ArrayList<>();
-			for (DefaultDomain domain : domains) {
-				groups.addAll(domain.getGroups());
-			}
-			return groups.toArray(new String[0]);
-		} else {
-			List<OfflinePlayer> players = new ArrayList<>();
+		List<Object> values = new ArrayList<>();
+		if (type != Type.GROUP) {
 			for (DefaultDomain domain : domains) {
 				for (UUID uuid : domain.getUniqueIds()) {
-					players.add(Bukkit.getOfflinePlayer(uuid));
+					values.add(Bukkit.getOfflinePlayer(uuid));
 				}
 			}
-			return players.toArray(new OfflinePlayer[0]);
 		}
+		if (type != Type.PLAYER) {
+			for (DefaultDomain domain : domains) {
+				values.addAll(domain.getGroups());
+			}
+		}
+		return values.toArray((Object[]) Array.newInstance(getReturnType(), values.size()));
 	}
 
 	@Override
 	public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
 		return switch (mode) {
-			case ADD, SET, REMOVE, DELETE, RESET -> new Class[]{isGroups ? String[].class : OfflinePlayer[].class};
+			case ADD, SET, REMOVE, DELETE, RESET -> {
+				Class<?>[] types = possibleReturnTypes();
+				for (int i = 0; i < types.length; i++) { // allow multiple values
+					types[i] = types[i].arrayType();
+				}
+				yield types;
+			}
 			default -> null;
 		};
 	}
@@ -112,68 +145,58 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 			}
 		}
 
-		if (isGroups) {
-			switch (mode) {
-				case SET:
-				case DELETE:
-				case RESET:
-					for (DefaultDomain domain : domains) {
-						domain.getGroupDomain().clear();
-					}
-					if (mode != ChangeMode.SET) { // Only fall through for SET
-						break;
-					}
-					//$FALL-THROUGH$
-				case ADD:
-					assert delta != null;
-					for (DefaultDomain domain : domains) {
-						for (Object group : delta) {
-							domain.addGroup((String) group);
+		switch (mode) {
+			case SET:
+				for (DefaultDomain domain : domains) {
+					domain.clear();
+				}
+				//$FALL-THROUGH$
+			case ADD:
+				assert delta != null;
+				for (DefaultDomain domain : domains) {
+					for (Object object : delta) {
+						if (object instanceof OfflinePlayer player) {
+							domain.addPlayer(player.getUniqueId());
+						} else {
+							domain.addGroup((String) object);
 						}
 					}
-					break;
-				case REMOVE:
-					assert delta != null;
-					for (DefaultDomain domain : domains) {
-						for (Object group : delta) {
-							domain.removeGroup((String) group);
+				}
+				break;
+			case REMOVE:
+				assert delta != null;
+				for (DefaultDomain domain : domains) {
+					for (Object object : delta) {
+						if (object instanceof OfflinePlayer player) {
+							domain.removePlayer(player.getUniqueId());
+						} else {
+							domain.removeGroup((String) object);
 						}
 					}
-					break;
-				default:
-					assert false;
-			}
-		} else { // Players
-			switch (mode) {
-				case SET:
-				case DELETE:
-				case RESET:
-					for (DefaultDomain domain : domains) {
-						domain.getPlayerDomain().clear();
-					}
-					if (mode != ChangeMode.SET) { // Only fall through for SET
-						break;
-					}
-					//$FALL-THROUGH$
-				case ADD:
-					assert delta != null;
-					for (DefaultDomain domain : domains) {
-						for (Object player : delta) {
-							domain.addPlayer(((OfflinePlayer) player).getUniqueId());
+				}
+				break;
+			case DELETE:
+			case RESET:
+				switch (type) {
+					case PLAYER -> {
+						for (DefaultDomain domain : domains) {
+							domain.getPlayerDomain().clear();
 						}
 					}
-					break;
-				case REMOVE:
-					assert delta != null;
-					for (DefaultDomain domain : domains) {
-						for (Object player : delta) {
-							domain.removePlayer(((OfflinePlayer) player).getUniqueId());
+					case GROUP -> {
+						for (DefaultDomain domain : domains) {
+							domain.getGroupDomain().clear();
 						}
 					}
-					break;
-				default:
-					assert false;
-			}
+					case BOTH -> {
+						for (DefaultDomain domain : domains) {
+							domain.clear();
+						}
+					}
+				}
+				break;
+			default:
+				assert false;
 		}
 	}
 
@@ -185,27 +208,34 @@ public class ExprRegionMembersOwners extends PropertyExpression<WorldGuardRegion
 
 	@Override
 	public Class<?> getReturnType() {
-		return isGroups ? String.class : OfflinePlayer.class;
+		return switch (type) {
+			case PLAYER -> OfflinePlayer.class;
+			case GROUP -> String.class;
+			case BOTH -> Object.class;
+		};
+	}
+
+	@Override
+	public Class<?>[] possibleReturnTypes() {
+		if (type == Type.BOTH) {
+			return new Class[]{OfflinePlayer.class, String.class};
+		}
+		return super.possibleReturnTypes();
 	}
 
 	@Override
 	public String toString(@Nullable Event event, boolean debug) {
 		SyntaxStringBuilder builder = new SyntaxStringBuilder(event, debug);
 		builder.append("the");
-		if (isGroups) {
-			if (isOwners) {
-				builder.append("owner");
-			} else {
-				builder.append("member");
-			}
-			builder.append("groups");
-		} else {
+		if (type == Type.PLAYER) {
 			builder.append("player");
-			if (isOwners) {
-				builder.append("owners");
-			} else {
-				builder.append("members");
-			}
+		} else if (type == Type.GROUP) {
+			builder.append("group");
+		}
+		if (isOwners) {
+			builder.append("owners");
+		} else {
+			builder.append("members");
 		}
 		builder.append("of", getExpr());
 		return builder.toString();
