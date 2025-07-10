@@ -38,8 +38,10 @@ import java.util.function.Function;
 
 @Name("Region Flag")
 @Description({
-		"An expression for working with the flag of a region.",
-		"NOTE: Skript may not support all flags, specifically those representing values Skript cannot understand."
+	"An expression for working with the flag of a region.",
+	"The region group flag of a flag supports controlling which groups of a region" +
+		" (i.e., members, owners, etc.) a flag applies to.",
+	"NOTE: Skript may not support all flags, specifically those representing values Skript cannot understand."
 })
 @Example("message flag \"greeting\" of player's region")
 @Since("1.0")

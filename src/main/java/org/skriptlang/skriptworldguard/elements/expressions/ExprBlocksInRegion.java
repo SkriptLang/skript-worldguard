@@ -22,7 +22,12 @@ import java.util.Iterator;
 
 @Name("Blocks of Region")
 @Description("An expression that returns all of the blocks in the given regions.")
-@Example("set the blocks of {arena} to air")
+@Example("""
+	command /fillregion <text> <material>:
+		trigger:
+			set {_region} to the region text-argument in the player's world
+			set the blocks of {_region} to material-argument
+	""")
 @Since("1.0")
 public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Block> {
 

@@ -15,8 +15,8 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
 @Name("Region Parent")
 @Description({
-		"An expression to obtain and change the parent of a region.",
-		"When a region has a parent, it inherits the parents members, owners, and flags (that aren't defined on the child)."
+	"An expression to obtain and change the parent of a region.",
+	"When a region has a parent, it inherits the parents members, owners, and flags (that aren't defined on the child)."
 })
 @Example("""
 	command /setparent <text>:

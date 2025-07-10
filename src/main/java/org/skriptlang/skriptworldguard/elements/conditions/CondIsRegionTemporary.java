@@ -10,8 +10,8 @@ import org.skriptlang.skriptworldguard.worldguard.WorldGuardRegion;
 
 @Name("Is Region Temporary")
 @Description({
-		"A condition to test whether a region is temporary.",
-		"Temporary regions are those that are removed when the server restarts."
+	"A condition to test whether a region is temporary.",
+	"Temporary regions are those that are removed when the server restarts."
 })
 @Example("""
 	on region enter:
