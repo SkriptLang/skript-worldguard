@@ -38,7 +38,8 @@ import java.util.List;
 		" At least three points must be provided to create a polygonal region.",
 	"Note that if you do not specify the world for a region, you must be sure that the locations provided all have the same world.",
 	"Note that Region IDs are only valid if they contain letters, numbers, underscores, commas, single quotation marks, dashes, pluses, and forward slashes.",
-	"Note that if you attempt to create a region in a world where a region with the same ID already exists, that region will be replaced."
+	"Note that if you attempt to create a region in a world where a region with the same ID already exists, that region will be replaced.",
+	"Note that if you do not specify the minimum and maximum heights for a polygonal region, those values will be calculated from the points."
 })
 @Example("create a temporary global region named \"temporary_global_region\" in the player's world")
 @Example("create region \"cuboid_region\" in player's world between the location (0, 60, 0) and the location (10, 70, 10)")
@@ -51,7 +52,7 @@ public class EffCreateRegion extends Effect {
 				.supplier(EffCreateRegion::new)
 				.addPatterns("create [a] [:temporary] global [worldguard] region [named] %string% [in %world%]",
 						"create [a] [:temporary] [cuboid|rectangular] [worldguard] region [named] %string% [in %-world%] (between|from) %location% (to|and) %location%",
-						"create [a] [:temporary] polygonal [worldguard] region [named] %string% [in %-world%] with [a] min[imum] height of %number% and [a] max[imum] height of %number% with [the] points %locations%")
+						"create [a] [:temporary] polygonal [worldguard] region [named] %string% [in %-world%] [with [a] min[imum] height of %-integer% and [a] max[imum] height of %-integer%] with [the] points %locations%")
 				.build());
 	}
 
@@ -63,8 +64,8 @@ public class EffCreateRegion extends Effect {
 	private @Nullable Expression<Location> firstCorner;
 	private @Nullable Expression<Location> secondCorner;
 	// Polygonal Region Values
-	private @Nullable Expression<Number> minY;
-	private @Nullable Expression<Number> maxY;
+	private @Nullable Expression<Integer> minY;
+	private @Nullable Expression<Integer> maxY;
 	private @Nullable Expression<Location> points;
 
 	@Override
@@ -77,8 +78,8 @@ public class EffCreateRegion extends Effect {
 			firstCorner = (Expression<Location>) exprs[2];
 			secondCorner = (Expression<Location>) exprs[3];
 		} else if (matchedPattern == 2) { // Polygonal Region
-			minY = (Expression<Number>) exprs[2];
-			maxY = (Expression<Number>) exprs[3];
+			minY = (Expression<Integer>) exprs[2];
+			maxY = (Expression<Integer>) exprs[3];
 			points = (Expression<Location>) exprs[4];
 		}
 		return true;
@@ -121,18 +122,39 @@ public class EffCreateRegion extends Effect {
 			}
 
 			region = new ProtectedCuboidRegion(id, temporary,
-					BukkitAdapter.asBlockVector(firstCorner),BukkitAdapter.asBlockVector(secondCorner));
-		} else if (minY != null) { // Polygonal Region
-			assert this.maxY != null && this.points != null;
-			Number minY = this.minY.getSingle(event);
-			Number maxY = this.maxY.getSingle(event);
+					BukkitAdapter.asBlockVector(firstCorner), BukkitAdapter.asBlockVector(secondCorner));
+		} else if (points != null) { // Polygonal Region
 			Location[] points = this.points.getArray(event);
-			if (minY == null || maxY == null || points.length == 0) {
+			if (points.length == 0) {
 				return;
 			}
 			if (points.length < 3) {
 				error("A polygonal region needs at least 3 points, but only " + points.length + " points were provided");
 				return;
+			}
+
+			int minY;
+			int maxY;
+			if (this.minY != null) {
+				assert this.maxY != null;
+				Integer minYInteger = this.minY.getSingle(event);
+				Integer maxYInteger = this.maxY.getSingle(event);
+				if (minYInteger == null || maxYInteger == null) {
+					return;
+				}
+				minY = minYInteger;
+				maxY = maxYInteger;
+				if (minY > maxY) {
+					error("The provided minimum height cannot be greater than the maximum height");
+					return;
+				}
+			} else {
+				minY = points[0].getBlockY();
+				maxY = minY;
+				for (Location point : points) {
+					minY = Math.min(minY, point.getBlockY());
+					maxY = Math.max(maxY, point.getBlockY());
+				}
 			}
 
 			if (world == null) { // Okay... we can try to get one from the locations
@@ -154,7 +176,7 @@ public class EffCreateRegion extends Effect {
 				pointVectors.add(BlockVector2.at(point.getBlockX(), point.getBlockZ()));
 			}
 
-			region = new ProtectedPolygonalRegion(id, temporary, pointVectors, minY.intValue(), maxY.intValue());
+			region = new ProtectedPolygonalRegion(id, temporary, pointVectors, minY, maxY);
 		} else { // Global Region
 			if (world == null) { // This is a global region, so there are no locations to use as a backup
 				return;
@@ -182,13 +204,16 @@ public class EffCreateRegion extends Effect {
 				builder.append("in", world);
 			}
 			builder.append("between", firstCorner, "and", secondCorner);
-		} else if (minY != null) { // Polygonal region
-			assert maxY != null && points != null;
+		} else if (points != null) { // Polygonal region
 			builder.append("polygonal region named", id);
 			if (world != null) {
 				builder.append("in", world);
 			}
-			builder.append("with a minimum height of", minY, "and a maximum height of", maxY, "with the points", points);
+			if (minY != null) {
+				assert maxY != null;
+				builder.append("with a minimum height of", minY, "and a maximum height of", maxY);
+			}
+			builder.append("with the points", points);
 		} else { // Global region
 			assert world != null;
 			builder.append("global region named", id, "in", world);
