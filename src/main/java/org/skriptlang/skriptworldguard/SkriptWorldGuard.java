@@ -1,6 +1,7 @@
 package org.skriptlang.skriptworldguard;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.classes.Changer;
 import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.classes.EnumClassInfo;
 import ch.njol.skript.classes.Parser;
@@ -15,10 +16,13 @@ import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.Version;
 import ch.njol.yggdrasil.Fields;
 import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.RemovalStrategy;
 import com.sk89q.worldguard.session.MoveType;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.addon.SkriptAddon;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -53,8 +57,8 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 			getLogger().severe("Could not find Skript! Make sure you have it installed and that it properly loaded. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
-		} else if (Skript.getVersion().isSmallerThan(new Version("2.12.0-pre1"))) {
-			getLogger().severe("You are running an unsupported version of Skript. Please update to at least Skript 2.10.0. Disabling...");
+		} else if (Skript.getVersion().isSmallerThan(new Version("2.12.0-pre2"))) {
+			getLogger().severe("You are running an unsupported version of Skript. Please update to at least Skript 2.12.0-pre2. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
@@ -142,6 +146,25 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 					@Override
 					protected boolean canBeInstantiated() {
 						return false;
+					}
+				})
+				.changer(new Changer<>() {
+					@Override
+					public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
+						if (mode == ChangeMode.DELETE) {
+							return new Class[0];
+						}
+						return null;
+					}
+
+					@Override
+					public void change(WorldGuardRegion[] regions, Object @Nullable [] delta, ChangeMode mode) {
+						for (WorldGuardRegion region : regions) {
+							RegionManager regionManager = RegionUtils.getRegionManager(region.world());
+							if (regionManager != null) {
+								regionManager.removeRegion(region.region().getId(), RemovalStrategy.UNSET_PARENT_IN_CHILDREN);
+							}
+						}
 					}
 				}));
 
