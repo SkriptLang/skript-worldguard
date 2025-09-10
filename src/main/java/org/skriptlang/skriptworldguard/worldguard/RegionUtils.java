@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -163,6 +164,9 @@ public final class RegionUtils {
 	 * @return An iterator over the blocks of the regions of {@code regionsIterator}.
 	 */
 	public static Iterator<Block> getRegionBlockIterator(Iterator<WorldGuardRegion> regionIterator) {
+		if (!regionIterator.hasNext()) { // no blocks to iterate over
+			return Collections.emptyIterator();
+		}
 		return new Iterator<>() {
 			Iterator<Block> currentBlockIterator = nextIterator();
 
