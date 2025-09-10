@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'org.skriptlang.skript'
-version '1.0-pre4'
+version '1.0.0'
 
 compileJava.options.encoding = 'UTF-8'
 
