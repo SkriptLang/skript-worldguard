@@ -60,6 +60,12 @@ public class ExprBlocksInRegion extends PropertyExpression<WorldGuardRegion, Blo
 		return RegionUtils.getRegionBlockIterator(regionIterator);
 	}
 
+    @Override
+    public boolean isSingle() {
+        // one region has many blocks
+        return false;
+    }
+
 	@Override
 	public Class<? extends Block> getReturnType() {
 		return Block.class;
