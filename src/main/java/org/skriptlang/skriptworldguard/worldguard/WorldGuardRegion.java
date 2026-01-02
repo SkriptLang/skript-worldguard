@@ -1,7 +1,5 @@
 package org.skriptlang.skriptworldguard.worldguard;
 
-import ch.njol.skript.lang.util.common.AnyContains;
-import ch.njol.skript.lang.util.common.AnyNamed;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -14,15 +12,13 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
-import org.skriptlang.skript.lang.converter.Converters;
 
 /**
  * A utility record for associating a {@link ProtectedRegion} with a {@link World}.
  * @param world The world {@code region} is within.
  * @param region WorldGuard region.
  */
-public record WorldGuardRegion(World world, ProtectedRegion region)
-		implements Comparable<WorldGuardRegion>, AnyNamed, AnyContains<Object> {
+public record WorldGuardRegion(World world, ProtectedRegion region) implements Comparable<WorldGuardRegion> {
 
 	/**
 	 * A helper method to provide a standardized way to stringify a {@link WorldGuardRegion} from its components.
@@ -37,15 +33,22 @@ public record WorldGuardRegion(World world, ProtectedRegion region)
 
 	@Override
 	public boolean equals(Object other) {
-		if (other instanceof WorldGuardRegion otherRegion) {
-			return otherRegion.world() == world && otherRegion.region().getId().equals(region.getId());
+		if (other instanceof WorldGuardRegion(World otherWorld, ProtectedRegion otherRegion)) {
+			return world == otherWorld && region.getId().equals(otherRegion.getId());
 		}
 		return false;
 	}
 
 	@Override
-	public String toString() {
+	public @NotNull String toString() {
 		return toString(world, region.getId());
+	}
+
+	/**
+	 * @return The name (ID) of this region.
+	 */
+	public String name() {
+		return region.getId();
 	}
 
 	/*
@@ -55,34 +58,6 @@ public record WorldGuardRegion(World world, ProtectedRegion region)
 	@Override
 	public int compareTo(@NotNull WorldGuardRegion other) {
 		return Integer.compare(this.region.getPriority(), other.region.getPriority());
-	}
-
-	/*
-	 * AnyNamed
-	 */
-
-	@Override
-	public String name() {
-		return region.getId();
-	}
-
-	/*
-	 * AnyContains
-	 */
-
-	@Override
-	public boolean contains(Object object) {
-		if (object instanceof Chunk chunk) {
-			BlockVector2 chunkVector = BlockVector2.at(chunk.getX(), chunk.getZ());
-			return asWorldEditRegion().getChunks().contains(chunkVector);
-		}
-		Location location = Converters.convert(object, Location.class);
-		return location != null && region.contains(BukkitAdapter.asBlockVector(location));
-	}
-
-	@Override
-	public boolean isSafeToCheck(Object value) {
-		return value != null;
 	}
 
 	/*
@@ -106,6 +81,23 @@ public record WorldGuardRegion(World world, ProtectedRegion region)
 			throw new IllegalArgumentException("Unexpected region type: " + region.getClass());
 		}
 		return worldEditRegion;
+	}
+
+	/**
+	 * @param chunk The chunk to check for.
+	 * @return Whether {@code chunk} is within this region.
+	 */
+	public boolean contains(Chunk chunk) {
+		BlockVector2 chunkVector = BlockVector2.at(chunk.getX(), chunk.getZ());
+		return asWorldEditRegion().getChunks().contains(chunkVector);
+	}
+
+	/**
+	 * @param location The location to check for.
+	 * @return Whether {@code location} is within this region.
+	 */
+	public boolean contains(Location location) {
+		return region.contains(BukkitAdapter.asBlockVector(location));
 	}
 
 }

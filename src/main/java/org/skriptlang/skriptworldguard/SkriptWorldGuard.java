@@ -19,12 +19,17 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.managers.RemovalStrategy;
 import com.sk89q.worldguard.session.MoveType;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.addon.SkriptAddon;
+import org.skriptlang.skript.lang.properties.Property;
+import org.skriptlang.skript.lang.properties.handlers.ContainsHandler;
+import org.skriptlang.skript.lang.properties.handlers.base.ExpressionPropertyHandler;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skript.util.ClassLoader;
 import org.skriptlang.skriptworldguard.worldguard.RegionUtils;
@@ -166,7 +171,25 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 							}
 						}
 					}
-				}));
+				})
+				.property(Property.NAME, "The name (ID) of a region as text. Cannot be changed.", addon,
+						ExpressionPropertyHandler.of(WorldGuardRegion::name, String.class))
+				.property(Property.CONTAINS, "Regions can contain chunks and locations.", addon,
+						new ContainsHandler<WorldGuardRegion, Object>() {
+							@Override
+							public boolean contains(WorldGuardRegion region, Object element) {
+								return switch (element) {
+									case Chunk chunk -> region.contains(chunk);
+									case Location location -> region.contains(location);
+									default -> false;
+								};
+							}
+
+							@Override
+							public Class<?>[] elementTypes() {
+								return new Class[]{Chunk.class, Location.class};
+							}
+						}));
 
 		Classes.registerClass(new EnumClassInfo<>(MoveType.class, "worldguardmovetype", "worldguard move types")
 				.user("worldguard ?move(ment)? ?types?")
