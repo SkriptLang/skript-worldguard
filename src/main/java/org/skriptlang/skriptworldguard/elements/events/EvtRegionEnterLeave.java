@@ -11,7 +11,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.bukkit.registration.BukkitRegistryKeys;
 import org.skriptlang.skript.bukkit.registration.BukkitSyntaxInfos;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skriptworldguard.worldguard.RegionEnterLeaveEvent;
@@ -21,7 +20,7 @@ public class EvtRegionEnterLeave extends SkriptEvent {
 
 	public static void register(SyntaxRegistry registry) {
 		String regionPattern = "[the] [worldguard] region[s] [with [the] (name[s]|id[s])|named] %*strings% [(in|of) [[the] world] %-*string%]";
-		registry.register(BukkitRegistryKeys.EVENT, BukkitSyntaxInfos.Event.builder(EvtRegionEnterLeave.class, "Region Enter/Leave")
+		registry.register(BukkitSyntaxInfos.Event.KEY, BukkitSyntaxInfos.Event.builder(EvtRegionEnterLeave.class, "Region Enter/Leave")
 				.supplier(EvtRegionEnterLeave::new)
 				.addEvent(RegionEnterLeaveEvent.class)
 				.addPatterns("region enter[ing]",
