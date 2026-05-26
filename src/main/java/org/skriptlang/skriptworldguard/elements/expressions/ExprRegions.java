@@ -25,7 +25,7 @@ import java.util.List;
 	"An expression to obtain all regions of a specific world or the region with a specific name in a world.",
 	"Please note that region names (IDs) are case insensitive."
 })
-@Example("the region \"region\" in world(\"world\"")
+@Example("the region \"region\" in world(\"world\")")
 @Example("all of the regions in the player's world")
 @Since("1.0")
 public class ExprRegions extends SimpleExpression<WorldGuardRegion> {
