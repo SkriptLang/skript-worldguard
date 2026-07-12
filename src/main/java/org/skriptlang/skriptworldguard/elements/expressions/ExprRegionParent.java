@@ -32,7 +32,7 @@ import java.util.List;
 			set the parent of the region text-argument-1 to the region text-argument-2
 	""")
 @Example("if any of all of the parent regions of {_region} are global")
-@Since("1.0")
+@Since("1.0, (INSERT VERSION Single Region)")
 public class ExprRegionParent extends SimplePropertyExpression<WorldGuardRegion, WorldGuardRegion> {
 
 	public static void register(SyntaxRegistry registry) {

@@ -122,6 +122,17 @@ public final class RegionUtils {
 	}
 
 	/**
+	 * A utility method for obtaining the region with the highest priority at a specific location.
+	 * @param location The location to search for region at
+	 * @return The region with the highest priority
+	 */
+	public static WorldGuardRegion getHighestRegionAt(Location location) {
+		return getRegionsAt(location).stream()
+				.max(WorldGuardRegion::compareTo)
+				.orElse(null);
+	}
+
+	/**
 	 * Tests if a player can build at a given location.
 	 * @param player The player to test with
 	 * @param location The location to test at

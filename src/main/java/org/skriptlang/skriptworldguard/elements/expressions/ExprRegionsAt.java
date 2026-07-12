@@ -23,7 +23,8 @@ import java.util.List;
 @Name("Regions At")
 @Description({
 	"An expression to obtain the regions at a specific location.",
-	"Note that the regions will be returned in ascending order by priority."
+	"Note that the regions will be returned in ascending order by priority.",
+	"If 'region' is used instead of 'regions', it will return the region with the highest priority."
 })
 @Example("""
 	on right click:
@@ -35,22 +36,33 @@ import java.util.List;
 		else:
 			message "You are in: %{_regions::*}%."
 	""")
+@Example("""
+	command /ownerinfo:
+		trigger:
+			set {_region} to region at player
+			send "Owners of this region are: %player owners of {_region}%"
+	""")
 @Since("1.0")
 public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 
 	public static void register(SyntaxRegistry registry) {
 		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRegionsAt.class, WorldGuardRegion.class)
 				.supplier(ExprRegionsAt::new)
-				.addPattern("[the] regions %direction% %locations%")
+				.addPatterns(
+						"[the] regions %direction% %locations%",
+						"[the] region %direction% %locations%"
+				)
 				.build());
 	}
 
 	private Expression<Location> locations;
+	private boolean isSingle;
 
 	@Override
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
 		//noinspection unchecked
 		locations = Direction.combine((Expression<? extends Direction>) exprs[0], (Expression<? extends Location>) exprs[1]);
+		isSingle = matchedPattern == 1;
 		return true;
 	}
 
@@ -61,16 +73,22 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 			return new WorldGuardRegion[0];
 		}
 		List<WorldGuardRegion> regions = new ArrayList<>();
-		for (Location location : locations) {
-			regions.addAll(RegionUtils.getRegionsAt(location));
+		if (!isSingle) {
+			for (Location location : locations) {
+				regions.addAll(RegionUtils.getRegionsAt(location));
+			}
+			regions.sort(WorldGuardRegion::compareTo);
+		} else {
+			for (Location location : locations) {
+				regions.add(RegionUtils.getHighestRegionAt(location));
+			}
 		}
-		regions.sort(WorldGuardRegion::compareTo);
 		return regions.toArray(new WorldGuardRegion[0]);
 	}
 
 	@Override
 	public boolean isSingle() {
-		return false;
+		return isSingle;
 	}
 
 	@Override
@@ -85,7 +103,7 @@ public class ExprRegionsAt extends SimpleExpression<WorldGuardRegion> {
 
 	@Override
 	public String toString(@Nullable Event event, boolean debug) {
-		return "the regions " + locations.toString(event, debug);
+		return "the region" + (isSingle ? " " : "s ") + locations.toString(event, debug);
 	}
 
 }
