@@ -72,7 +72,9 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 			getLogger().severe("Could not find WorldGuard! Make sure you have it installed and that it properly loaded. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
-		} else if (new Version(WorldGuard.getVersion()).isSmallerThan(new Version(7))) {
+		}
+
+		if (new Version(WorldGuard.getVersion()).isSmallerThan(new Version(7))) {
 			getLogger().severe("You are running an unsupported version of WorldGuard. Please update to at least WorldGuard 7. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
