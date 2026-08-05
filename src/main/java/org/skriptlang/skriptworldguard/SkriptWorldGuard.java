@@ -62,11 +62,14 @@ public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 			getLogger().severe("Could not find Skript! Make sure you have it installed and that it properly loaded. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
-		} else if (Skript.getVersion().isSmallerThan(new Version("2.14.0-pre1"))) {
+		}
+		
+		if (Skript.getVersion().isSmallerThan(new Version("2.14.0-pre1"))) {
 			getLogger().severe("You are running an unsupported version of Skript. Please update to at least Skript 2.14.0. Disabling...");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
+
 		Plugin worldGuard = getServer().getPluginManager().getPlugin("WorldGuard");
 		if (worldGuard == null || !worldGuard.isEnabled()) {
 			getLogger().severe("Could not find WorldGuard! Make sure you have it installed and that it properly loaded. Disabling...");
