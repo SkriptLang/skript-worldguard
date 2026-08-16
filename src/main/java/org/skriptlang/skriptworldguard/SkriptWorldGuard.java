@@ -41,6 +41,11 @@ import java.lang.reflect.InvocationTargetException;
 
 public class SkriptWorldGuard extends JavaPlugin implements AddonModule {
 
+  @Override
+  public String name() {
+    return "skript-worldguard";
+  }
+
 	private static SkriptWorldGuard instance;
 
 	public static SkriptWorldGuard getInstance() {

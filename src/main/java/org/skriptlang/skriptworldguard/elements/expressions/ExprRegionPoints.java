@@ -60,7 +60,7 @@ public class ExprRegionPoints extends PropertyExpression<WorldGuardRegion, Locat
 		List<Location> locations = new ArrayList<>();
 		if (isAll) {
 			for (WorldGuardRegion region : regions) {
-				int minY = region.region().getMinimumPoint().getY();
+				int minY = region.region().getMinimumPoint().y();
 				region.region().getPoints().stream()
 						.map(point -> BukkitAdapter.adapt(region.world(), point.toBlockVector3(minY)))
 						.forEach(locations::add);

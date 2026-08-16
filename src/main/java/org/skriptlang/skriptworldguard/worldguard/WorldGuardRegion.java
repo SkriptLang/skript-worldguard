@@ -73,7 +73,7 @@ public record WorldGuardRegion(World world, ProtectedRegion region) implements C
 		Region worldEditRegion;
 		if (region instanceof ProtectedPolygonalRegion polygonalRegion) { // Not as simple as a cube...
 			worldEditRegion = new Polygonal2DRegion(BukkitAdapter.adapt(world), polygonalRegion.getPoints(),
-					polygonalRegion.getMinimumPoint().getY(), polygonalRegion.getMaximumPoint().getY());
+					polygonalRegion.getMinimumPoint().y(), polygonalRegion.getMaximumPoint().y());
 		} else if (region instanceof ProtectedCuboidRegion) {
 			worldEditRegion = new CuboidRegion(BukkitAdapter.adapt(world),
 					region.getMinimumPoint(), region.getMaximumPoint());

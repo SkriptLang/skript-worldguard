@@ -60,7 +60,7 @@ public final class RegionUtils {
 	 * A utility method for obtaining all of the regions in a world.
 	 * @param world The world to obtain regions of.
 	 * @return The regions of {@code world}.
-	 *  If {@link #getRegionManager(World)} is unavailable, this method returns an empty list.
+	 * If {@link #getRegionManager(World)} is unavailable, this method returns an empty list.
 	 */
 	public static @Unmodifiable List<WorldGuardRegion> getRegions(World world) {
 		RegionManager regionManager = getRegionManager(world);
@@ -115,9 +115,11 @@ public final class RegionUtils {
 		}
 
 		List<WorldGuardRegion> regions = new ArrayList<>();
-		for (ProtectedRegion region : regionManager.getApplicableRegions(BukkitAdapter.asBlockVector(location))) {
+		for (ProtectedRegion region : regionManager.getApplicableRegions(
+				BukkitAdapter.asBlockVector(location))) {
 			regions.add(new WorldGuardRegion(world, region));
 		}
+
 		return regions;
 	}
 
@@ -132,9 +134,16 @@ public final class RegionUtils {
 		if (world == null) {
 			return false;
 		}
+
 		LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-		return WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(localPlayer, BukkitAdapter.adapt(world)) ||
-				getRegionContainer().createQuery().testBuild(BukkitAdapter.adapt(location), localPlayer);
+
+		return WorldGuard.getInstance()
+				.getPlatform()
+				.getSessionManager()
+				.hasBypass(localPlayer, BukkitAdapter.adapt(world))
+				|| getRegionContainer()
+				.createQuery()
+				.testBuild(BukkitAdapter.adapt(location), localPlayer);
 	}
 
 	/**
@@ -145,16 +154,25 @@ public final class RegionUtils {
 	 */
 	public static boolean canBuild(Player player, WorldGuardRegion... regions) {
 		LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+
 		// check bypass
 		for (WorldGuardRegion region : regions) {
-			if (WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(localPlayer, BukkitAdapter.adapt(region.world()))) {
+			if (WorldGuard.getInstance()
+					.getPlatform()
+					.getSessionManager()
+					.hasBypass(localPlayer, BukkitAdapter.adapt(region.world()))) {
 				return true;
 			}
 		}
+
 		// create queryable set of regions
-		ApplicableRegionSet regionSet = new RegionResultSet((List<ProtectedRegion>) Arrays.stream(regions)
-				.map(WorldGuardRegion::region)
-				.collect(Collectors.toCollection(ArrayList::new)), null);
+		ApplicableRegionSet regionSet = new RegionResultSet(
+				(List<ProtectedRegion>) Arrays.stream(regions)
+						.map(WorldGuardRegion::region)
+						.collect(Collectors.toCollection(ArrayList::new)),
+				null
+		);
+
 		return regionSet.testState(localPlayer, Flags.BUILD);
 	}
 
@@ -163,21 +181,33 @@ public final class RegionUtils {
 	 * @param regionIterator An iterator over the regions whose blocks should be iterated over.
 	 * @return An iterator over the blocks of the regions of {@code regionsIterator}.
 	 */
-	public static Iterator<Block> getRegionBlockIterator(Iterator<WorldGuardRegion> regionIterator) {
-		if (!regionIterator.hasNext()) { // no blocks to iterate over
+	public static Iterator<Block> getRegionBlockIterator(
+			Iterator<WorldGuardRegion> regionIterator) {
+
+		if (!regionIterator.hasNext()) {
 			return Collections.emptyIterator();
 		}
+
 		return new Iterator<>() {
+
 			Iterator<Block> currentBlockIterator = nextIterator();
 
 			private Iterator<Block> nextIterator() {
-				if (!regionIterator.hasNext()) { // no new blocks, reuse empty iterator
+				if (!regionIterator.hasNext()) {
 					return currentBlockIterator;
 				}
+
 				WorldGuardRegion region = regionIterator.next();
 				World world = region.world();
-				return Iterators.transform(region.asWorldEditRegion().iterator(),
-						blockVector -> world.getBlockAt(blockVector.getX(), blockVector.getY(), blockVector.getZ()));
+
+				return Iterators.transform(
+						region.asWorldEditRegion().iterator(),
+						blockVector -> world.getBlockAt(
+								blockVector.x(),
+								blockVector.y(),
+								blockVector.z()
+						)
+				);
 			}
 
 			@Override
@@ -185,6 +215,7 @@ public final class RegionUtils {
 				if (!currentBlockIterator.hasNext()) {
 					currentBlockIterator = nextIterator();
 				}
+
 				return currentBlockIterator.hasNext();
 			}
 
@@ -193,9 +224,9 @@ public final class RegionUtils {
 				if (!currentBlockIterator.hasNext()) {
 					currentBlockIterator = nextIterator();
 				}
+
 				return currentBlockIterator.next();
 			}
 		};
 	}
-
 }

@@ -106,8 +106,7 @@ public record WorldGuardFlag<F, T>(Flag<T> flag, FlagValueConverter<F, T> valueC
 		mappings.put(VectorFlag.class, Vector3.class);
 		converters.put(Vector3.class, new FlagValueConverter<>(Vector.class, Vector3.class,
 				from -> Vector3.at(from.getX(), from.getY(), from.getZ()),
-				to -> new Vector(to.getX(), to.getY(), to.getZ())));
-
+        to -> new Vector(to.x(), to.y(), to.z())));
 		// Additional mappings
 		// no WorldGuard GameMode -> Bukkit GameMode adapter...
 		converters.put(com.sk89q.worldedit.world.gamemode.GameMode.class,
